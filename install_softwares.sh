@@ -22,7 +22,8 @@ declare -A INSTALL_FUNCTIONS=(
     ["Docker"]="install_Docker"
     ["Eduroam"]="install_Eduroam"
     ["kubectl"]="install_kubectl"
-    #["NodeJS"]="install_NodeJS"
+    ["NodeJS"]="install_NodeJS"
+    ["Spotify"]="install_Spotify"
 )
 
 # Flag mappings for parsing
@@ -43,7 +44,7 @@ COMMANDS="wget curl git"
 # Function to install packages using apt-get
 apt_get_install() {
     sudo apt-get install -y "$1" > /dev/null 2>> "$LOG_FILE"
-    log_message "INFO" "$1 successfully installed"
+    #log_message "INFO" "$1 successfully installed"
 }
 
 # init script function needed to run the script
@@ -262,6 +263,24 @@ install_NodeJS() {
     log_message "INFO" "Npm successfully updated with the version $(npm -v)"
 }
 
+install_Spotify() {
+    # Verify if Spotify is already installed
+    is_installed "spotify" && return
+
+    # Add the Spotify repository signing keys to be able to verify downloaded packages
+    curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+
+    # Add the Spotify repository
+    echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+
+    # Update list of available packages
+    sudo apt-get update
+
+    # Install Spotify
+    apt_get_install spotify-client
+    log_message "INFO" "Spotify successfully installed"
+}
+
 # Show help message
 show_help() {
     echo "Usage: $0 [options]"
@@ -331,6 +350,24 @@ show_progress_bar() {
     printf "\r\033[KProgress: [%s%s] %d%%" "$bar" "$spaces" "$percent" >&2 # \033[K -> clears the line
 }
 
+install_one_function() {
+    local software=$1
+    ${INSTALL_FUNCTIONS[$software]} & #>> "$LOG_FILE" 2>&1  # Redirect software logs
+            # Get the PID of the installation process
+            local pid=$!
+
+            # Monitor the progress while the installation is happening
+            while kill -0 "$pid" 2>/dev/null; do
+                show_progress_bar "$installed_count" "$total_packages"
+                sleep 0.005  # Update the progress bar every 0.5 seconds
+            done
+            
+            installed_count=$((installed_count + 1))
+            show_progress_bar "$installed_count" "$total_packages"
+
+            sleep 0.5
+}
+
 # Install softwares based on user input
 install_functions() {
     update_upgrade
@@ -339,10 +376,8 @@ install_functions() {
         local total_packages=${#INSTALL_FUNCTIONS[@]}
         local installed_count=0
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
-            ${INSTALL_FUNCTIONS[$software]} >> "$LOG_FILE" 2>&1  # Redirect software logs
-            installed_count=$((installed_count + 1))
-            show_progress_bar "$installed_count" "$total_packages"
-            sleep 0.1
+            ${INSTALL_FUNCTIONS[$software]}  # Original line
+            #install_one_function "$software" >> "$LOG_FILE" 2>&1 # This line is for progress bar but doesn't print the logs on the terminal, instead it prints on the log file
         done
         echo "" 
         log_message "INFO" "Installation completed: 100%"
@@ -437,8 +472,8 @@ main() {
             install_functions "${selected_software[@]}"
             ;;
         "" )
-            log_message "INFO" "No flags provided, prompting for software installation"
-            show_help
+            log_message "INFO" "No flags provided, starting interactive installation"
+            install_functions
             ;;
     esac
 }
