@@ -24,6 +24,8 @@ declare -A INSTALL_FUNCTIONS=(
     ["kubectl"]="install_kubectl"
     ["NodeJS"]="install_NodeJS"
     ["Spotify"]="install_Spotify"
+    ["SQLite"]="intall_SQLite_CLI"
+    ["SQLiteBrowser"]="install_browser-SQLite"
 )
 
 # Flag mappings for parsing
@@ -279,6 +281,22 @@ install_Spotify() {
     # Install Spotify
     apt_get_install spotify-client
     log_message "INFO" "Spotify successfully installed"
+}
+
+intall_SQLite_CLI() {
+    # Verify if SQLite is already installed
+    is_installed "sqlite3" && return
+
+    # Install SQLite
+    apt_get_install sqlite3
+    log_message "INFO" "SQLite CLI successfully installed"
+}
+
+install_browser-SQLite() {
+    is_installed "sqlitebrowser" && return
+
+    apt_get_install sqlitebrowser
+    log_message "INFO" "SQLite Browser successfully installed"
 }
 
 # Show help message
