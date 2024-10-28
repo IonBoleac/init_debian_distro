@@ -342,7 +342,8 @@ install_AzureStorageExplorer() {
 show_help() {
     echo "Usage: $0 [options]"
     echo
-    echo "This script installs various software tools interactively or all at once."
+    echo "This script installs various software tools interactively or all at once. It can also exclude specific software."
+    echo "The script is designed for Debian-based distributions."
     echo
     echo "Options:"
 
