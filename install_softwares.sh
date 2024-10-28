@@ -26,6 +26,7 @@ declare -A INSTALL_FUNCTIONS=(
     ["Spotify"]="install_Spotify"
     ["SQLite"]="intall_SQLite_CLI"
     ["SQLiteBrowser"]="install_browser-SQLite"
+    ["AzureStorageExplorer"]="install_AzureStorageExplorer"
 )
 
 # Flag mappings for parsing
@@ -89,6 +90,7 @@ init_script() {
 
 # Update and upgrade
 update_upgrade() {
+    log_message "INFO" "Updating and upgrading system in progress..."
     sudo apt-get update > /dev/null 2>> "$LOG_FILE"
     sudo apt-get upgrade -y >> /dev/null 2>> "$LOG_FILE"
     log_message "INFO" "System successfully updated and upgraded"
@@ -118,9 +120,20 @@ restart_session() {
 }
 
 # Check if software is already installed
-is_installed() {
-    local cmd=$1
+apt_is_installed() {
+    local cmd=$1 > /dev/null
     if [ -x "$(command -v $cmd)" ]; then
+        log_message "INFO" "$cmd is already installed"
+        return 0
+    else
+        return 1
+    fi
+}
+
+snap_is_installed() {
+    local cmd=$1
+    snap list | grep $cmd > /dev/null
+    if [ $? -eq 0 ]; then
         log_message "INFO" "$cmd is already installed"
         return 0
     else
@@ -131,7 +144,7 @@ is_installed() {
 # Install VSCode
 install_VSCode() {
     # Verify if VSCode is already installed
-    is_installed "code" && return
+    apt_is_installed "code" && return
 
     # Download and install VSCode
     wget https://go.microsoft.com/fwlink/?LinkID=760868 -O vscode.deb
@@ -159,7 +172,7 @@ install_Brave() {
 
 install_Docker() {
     # Verify if Docker is already installed
-    is_installed "docker" && return
+    apt_is_installed "docker" && return
 
 
     # Add Docker's official GPG key:
@@ -214,7 +227,7 @@ install_Eduroam() {
 # Install kubectl
 install_kubectl() {
     # Verify if kubectl is already installed
-    is_installed "kubectl" && return
+    apt_is_installed "kubectl" && return
 
     # Download kubectl
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -253,7 +266,7 @@ install_kubectl() {
 # Install Node.js
 install_NodeJS() {
     # Verify if Node.js is already installed
-    is_installed "node" && return
+    apt_is_installed "node" && return
 
     # Download and install Node.js
     curl -fsSL https://deb.nodesource.com/setup_23.x | sudo -E bash -
@@ -267,7 +280,7 @@ install_NodeJS() {
 
 install_Spotify() {
     # Verify if Spotify is already installed
-    is_installed "spotify" && return
+    apt_is_installed "spotify" && return
 
     # Add the Spotify repository signing keys to be able to verify downloaded packages
     curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
@@ -285,7 +298,7 @@ install_Spotify() {
 
 intall_SQLite_CLI() {
     # Verify if SQLite is already installed
-    is_installed "sqlite3" && return
+    apt_is_installed "sqlite3" && return
 
     # Install SQLite
     apt_get_install sqlite3
@@ -293,10 +306,36 @@ intall_SQLite_CLI() {
 }
 
 install_browser-SQLite() {
-    is_installed "sqlitebrowser" && return
+    apt_is_installed "sqlitebrowser" && return
 
     apt_get_install sqlitebrowser
     log_message "INFO" "SQLite Browser successfully installed"
+}
+
+install_AzureStorageExplorer() {
+    # Verify if Azure Storage Explorer is already installed
+    snap_is_installed "storage-explorer" && return
+
+    sudo snap install storage-explorer
+
+    # Connect to password-manager-service interface
+    snap connect storage-explorer:password-manager-service :password-manager-service 
+
+    # Create an executable run script
+    touch ~/snap-connect.sh
+    echo "#!/bin/bash
+    snap connect storage-explorer:password-manager-service :password-manager-service" > ~/snap-connect.sh
+
+    # make it run on startup
+    touch ~/.config/autostart/snap-connect.sh.desktop
+    echo "[Desktop Entry]
+    Exec=/home/iovanni/snap-connect.sh
+    Icon=dialog-scripts
+    Name=snap-connect.sh
+    Type=Application
+    X-KDE-AutostartScript=true" > ~/.config/autostart/snap-connect.sh.desktop
+
+    log_message "INFO" "Azure Storage Explorer successfully installed"
 }
 
 # Show help message
@@ -405,6 +444,7 @@ install_functions() {
         local exclude=("$@")
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
             if [[ ! " ${exclude[*]} " =~ ${software} ]]; then
+                log_message "INFO" "Installing $software in progress..."
                 ${INSTALL_FUNCTIONS[$software]}
             else
                 log_message "INFO" "Skipping $software as per exclusion list"
@@ -417,7 +457,7 @@ install_functions() {
     if [ $# -gt 0 ]; then
         for software in "$@"; do
             if [[ -n "${INSTALL_FUNCTIONS[$software]}" ]]; then
-                log_message "INFO" "Installing $software"
+                log_message "INFO" "Installing $software in progress..."
                 ${INSTALL_FUNCTIONS[$software]}
             else
                 log_message "ERROR" "Unknown software: $software"
@@ -427,6 +467,7 @@ install_functions() {
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
             read -p "Install $software? [Y/n]: " input
             if [[ "$input" =~ ^[Yy]$ ]]; then
+                log_message "INFO" "Installing $software in progress..."
                 ${INSTALL_FUNCTIONS[$software]}
             fi
         done
