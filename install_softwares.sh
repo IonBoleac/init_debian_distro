@@ -29,6 +29,16 @@ declare -A INSTALL_FUNCTIONS=(
     ["AzureStorageExplorer"]="install_AzureStorageExplorer"
 )
 
+declare -A LINK_SOFTWARE_LIST=(
+    ["VSCode"]="https://go.microsoft.com/fwlink/?LinkID=760868"
+    ["Brave"]="https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"
+    ["Docker"]="https://download.docker.com/linux/ubuntu/gpg"
+    ["kubectl"]="https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    ["NodeJS"]="https://deb.nodesource.com/setup_23.x"
+    ["Spotify"]="https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg"
+    ["AzureStorageExplorer"]="https://snapcraft.io/storage-explorer"
+)
+
 # Flag mappings for parsing
 declare -A FLAGS_DECLARATION=(
     ["--all"]="all"
@@ -42,7 +52,7 @@ declare -A FLAGS_DECLARATION=(
 )
 
 # commands needed to run the script like wget, curl save in a variable
-COMMANDS="wget curl git"
+COMMANDS="wget curl git snapd"
 
 # Function to install packages using apt-get
 apt_get_install() {
@@ -57,7 +67,7 @@ init_script() {
     for cmd in $COMMANDS; do
         if ! command -v "$cmd" &> /dev/null; then
             log_message "ERROR" "$cmd is required but not installed. Installing it....."
-            sudo apt-get install "$cmd"
+            apt_get_install "$cmd"
         fi
     done
 
