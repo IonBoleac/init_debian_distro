@@ -27,6 +27,7 @@ declare -A INSTALL_FUNCTIONS=(
     ["SQLite"]="intall_SQLite_CLI"
     ["SQLiteBrowser"]="install_browser-SQLite"
     ["AzureStorageExplorer"]="install_AzureStorageExplorer"
+    ["Microk8s"]="install_Microk8s"
 )
 
 declare -A LINK_SOFTWARE_LIST=(
@@ -346,6 +347,21 @@ install_AzureStorageExplorer() {
     X-KDE-AutostartScript=true" > ~/.config/autostart/snap-connect.sh.desktop
 
     log_message "INFO" "Azure Storage Explorer successfully installed"
+}
+
+install_Microk8s() {
+    # Verify if Microk8s is already installed
+    snap_is_installed "microk8s" && return
+
+    sudo snap install microk8s --classic
+
+    # Add to the user group
+    sudo usermod -a -G microk8s $USER
+    mkdir -p ~/.kube
+    chmod 0700 ~/.kube
+
+    # Verify the installation
+    microk8s status --wait-ready    
 }
 
 # Show help message
