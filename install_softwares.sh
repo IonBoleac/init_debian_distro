@@ -95,7 +95,7 @@ declare -A FLAGS_DECLARATION=(
 )
 
 # commands needed to run the script like wget, curl save in a variable
-COMMANDS="wget curl git snap"
+COMMANDS="wget curl git"
 
 # Function to install packages using apt-get
 apt_get_install() {
