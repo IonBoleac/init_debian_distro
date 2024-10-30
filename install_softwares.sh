@@ -15,37 +15,79 @@ log_message() {
 # Constants
 LOG_FILE="logs.log"
 
-# List of all software installation functions
-declare -A INSTALL_FUNCTIONS=(
-    ["VSCode"]="install_VSCode"
-    ["Brave"]="install_Brave"
-    ["Docker"]="install_Docker"
-    ["Eduroam"]="install_Eduroam"
-    ["kubectl"]="install_kubectl"
-    ["NodeJS"]="install_NodeJS"
-    ["Spotify"]="install_Spotify"
-    ["SQLite"]="intall_SQLite_CLI"
-    ["SQLiteBrowser"]="install_browser-SQLite"
-    ["AzureStorageExplorer"]="install_AzureStorageExplorer"
-    ["Microk8s"]="install_Microk8s"
+
+# Declare SOFTWARE_DETAILS and populate it with software details
+# New software can be added in the following format to install it. It's must be declared in the following format
+# format: ["name of the software"]="install_function;install_method;description;link"
+# [""]=";;;"
+declare -A SOFTWARE_DETAILS=(
+    ["VSCode"]="install_VSCode;apt;Popular code editor for developers.;https://go.microsoft.com/fwlink/?LinkID=760868"
+    ["Brave"]="install_Brave;apt;Privacy-focused web browser.;"
+    ["Docker"]="install_Docker;apt;Platform for building, sharing, and running applications with containers.;"
+    ["Eduroam"]="install_Eduroam;script;Secure, worldwide roaming access service developed for the international research and education community.;"
+    ["kubectl"]="install_kubectl;curl;command-line tool for controlling Kubernetes clusters.;https://kubernetes.io/docs/tasks/tools/install-kubectl/"
+    ["Node.js"]="install_NodeJS;curl;JavaScript runtime built on Chrome's V8 JavaScript engine.;https://nodejs.org/en/download/"
+    ["Spotify"]="install_Spotify;apt;Digital music streaming service.;"
+    ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;"
+    ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;"
+    #["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;" # At the moment not working
+    ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;"
 )
 
-declare -A LINK_SOFTWARE_LIST=(
-    ["VSCode"]="https://go.microsoft.com/fwlink/?LinkID=760868"
-    ["Brave"]="https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"
-    ["Docker"]="https://download.docker.com/linux/ubuntu/gpg"
-    ["kubectl"]="https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    ["NodeJS"]="https://deb.nodesource.com/setup_23.x"
-    ["Spotify"]="https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg"
-    ["AzureStorageExplorer"]="https://snapcraft.io/storage-explorer"
-)
+# Function to extract the install function for a given software
+get_install_function() {
+    local software=$1
+    echo "${SOFTWARE_DETAILS[$software]}" | cut -d';' -f1
+}
+
+# Function to extract the install method for a given software
+get_install_method() {
+    local software=$1
+    echo "${SOFTWARE_DETAILS[$software]}" | cut -d';' -f2
+}
+
+# Function to extract the description for a given software
+get_software_description() {
+    local software=$1
+    echo "${SOFTWARE_DETAILS[$software]}" | cut -d';' -f3
+}
+
+# Function to extract the install method for a given software
+get_software_link() {
+    local software=$1
+    echo "${SOFTWARE_DETAILS[$software]}" | cut -d';' -f4
+}
+
+# Declare INSTALL_FUNCTIONS and populate it from SOFTWARE_DETAILS
+declare -A INSTALL_FUNCTIONS
+for software in "${!SOFTWARE_DETAILS[@]}"; do
+    INSTALL_FUNCTIONS["$software"]="$(get_install_function "$software")"
+done
+
+# Declare METHOD_SOFTWARE_LIST and populate it with software install methods
+declare -A METHOD_SOFTWARE_LIST
+for software in "${!SOFTWARE_DETAILS[@]}"; do
+    METHOD_SOFTWARE_LIST["$software"]="$(get_install_method "$software")"
+done
+
+declare -A DESCRIPTION_SOFTWARE_LIST
+for software in "${!SOFTWARE_DETAILS[@]}"; do
+    DESCRIPTION_SOFTWARE_LIST["$software"]="$(get_software_description "$software")"
+done
+
+# Declare LINK_SOFTWARE_LIST and populate it with software download links
+declare -A LINK_SOFTWARE_LIST
+for software in "${!SOFTWARE_DETAILS[@]}"; do
+    LINK_SOFTWARE_LIST["$software"]="$(get_software_link "$software")"
+done
+
 
 # Flag mappings for parsing
 declare -A FLAGS_DECLARATION=(
     ["--all"]="all"
     ["-a"]="all"
-    ["--all-excluding"]="all_excluding"
-    ["-ax"]="all_excluding"
+    ["--all-excluding"]="all-excluding"
+    ["-ax"]="all-excluding"
     ["--install"]="install"
     ["-i"]="install"
     ["--help"]="help"
@@ -53,7 +95,7 @@ declare -A FLAGS_DECLARATION=(
 )
 
 # commands needed to run the script like wget, curl save in a variable
-COMMANDS="wget curl git snapd"
+COMMANDS="wget curl git snap"
 
 # Function to install packages using apt-get
 apt_get_install() {
@@ -333,21 +375,25 @@ install_AzureStorageExplorer() {
     snap connect storage-explorer:password-manager-service :password-manager-service 
 
     # Create an executable run script
-    touch ~/snap-connect.sh
+    touch ~/.snap-connect.sh
     echo "#!/bin/bash
-    snap connect storage-explorer:password-manager-service :password-manager-service" > ~/snap-connect.sh
+snap connect storage-explorer:password-manager-service :password-manager-service" > ~/.snap-connect.sh
 
-    # make it run on startup
+    # Make the script executable
+    chmod +x ~/.snap-connect.sh
+
+    # Make it run on startup
     touch ~/.config/autostart/snap-connect.sh.desktop
     echo "[Desktop Entry]
-    Exec=/home/iovanni/snap-connect.sh
-    Icon=dialog-scripts
-    Name=snap-connect.sh
-    Type=Application
-    X-KDE-AutostartScript=true" > ~/.config/autostart/snap-connect.sh.desktop
+Exec=/home/$USER/.snap-connect.sh
+Icon=dialog-scripts
+Name=snap-connect.sh
+Type=Application
+X-KDE-AutostartScript=true" > ~/.config/autostart/snap-connect.sh.desktop
 
     log_message "INFO" "Azure Storage Explorer successfully installed"
 }
+
 
 install_Microk8s() {
     # Verify if Microk8s is already installed
@@ -393,29 +439,32 @@ show_help() {
     for action in "${!flag_groups[@]}"; do
         case "$action" in
             "all")
-                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]}" "Install all software tools without prompts"
+                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]}" "# Install all software tools without prompts"
                 ;;
-            "all_excluding")
-                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]} [software...]" "Install all except specified software"
+            "all-excluding")
+                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]} [software...]" "# Install all except specified software"
                 ;;
             "install")
-                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]} [software...]" "Specify software to install (use one or more names)"
+                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]} [software...]" "# Specify software to install (use one or more names)"
                 ;;
             "help")
-                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]}" "Show this help message"
+                printf "  %-*s %s\n" "$column_width" "${flag_groups[$action]}" "# Show this help message"
                 ;;
         esac
     done
 
     echo
     echo "Software options for --${FLAGS_DECLARATION["-i"]} and --${FLAGS_DECLARATION["-ax"]}:"
+    # Display each software, its description, and link
     for software in "${!INSTALL_FUNCTIONS[@]}"; do
-        echo "  - $software"
+        local description="${DESCRIPTION_SOFTWARE_LIST[$software]}"
+        local link="${LINK_SOFTWARE_LIST[$software]}"
+        printf "  %-*s %s %s\n" "$column_width" "${software}" "# $description" "${link}"
     done
     echo
     echo "Example usage:"
-    echo "  ./script.sh --all-excluding Brave Docker  # Install all except Brave and Docker"
-    echo "  ./script.sh --install Brave Docker        # Install only Brave and Docker"
+    printf "  %-*s %s\n" "$column_width" "$0 -ax Brave Docker" "# Install all except Brave and Docker"
+    printf "  %-*s %s\n" "$column_width" "$0 -i Brave Docker" "# Install only Brave and Docker"
 }
 
 # Progress bar function based on software installation count, outputs to stderr
@@ -460,13 +509,13 @@ install_functions() {
         local total_packages=${#INSTALL_FUNCTIONS[@]}
         local installed_count=0
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
-            ${INSTALL_FUNCTIONS[$software]}  # Original line
-            #install_one_function "$software" >> "$LOG_FILE" 2>&1 # This line is for progress bar but doesn't print the logs on the terminal, instead it prints on the log file
+            #${INSTALL_FUNCTIONS[$software]}  # Original line
+            install_one_function "$software" >> "$LOG_FILE" 2>&1 # This line is for progress bar but doesn't print the logs on the terminal, instead it prints on the log file
         done
         echo "" 
         log_message "INFO" "Installation completed: 100%"
         return
-    elif [[ "$1" == "all_excluding" ]]; then
+    elif [[ "$1" == "all-excluding" ]]; then
         shift
         local exclude=("$@")
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
@@ -514,8 +563,8 @@ main() {
                 flag_type="all"
                 shift
                 ;;
-            "all_excluding" )
-                flag_type="all_excluding"
+            "all-excluding" )
+                flag_type="all-excluding"
                 shift
                 while [[ $# -gt 0 && "$1" != "--"* ]]; do
                     excluded_software+=("$1")
@@ -549,9 +598,9 @@ main() {
             log_message "INFO" "Installing all software tools without prompts"
             install_functions "all"
             ;;
-        "all_excluding" )
+        "all-excluding" )
             log_message "INFO" "Installing all software tools except ${excluded_software[*]}"
-            install_functions "all_excluding" "${excluded_software[@]}"
+            install_functions "all-excluding" "${excluded_software[@]}"
             ;;
         "install" )
             log_message "INFO" "Installing specified software ${selected_software[*]} "
