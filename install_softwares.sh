@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Constants
+LOG_FILE="logs.log"
+
 # Log system messages
 log_message() {
     local SEVERITY=$1
@@ -11,9 +14,6 @@ log_message() {
     esac
     echo -e "$(date '+%Y-%m-%d %H:%M:%S'): $COLOR$SEVERITY - $MESSAGE\033[0m" | tee -a "$LOG_FILE"
 }
-
-# Constants
-LOG_FILE="logs.log"
 
 
 # Declare SOFTWARE_DETAILS and populate it with software details
@@ -30,7 +30,7 @@ declare -A SOFTWARE_DETAILS=(
     ["Spotify"]="install_Spotify;apt;Digital music streaming service.;"
     ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;"
     ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;"
-    #["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;" # At the moment not working
+    ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;" # At the moment not working
     ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;"
 )
 
@@ -611,6 +611,9 @@ main() {
             install_functions
             ;;
     esac
+
+    # Restart user session after installation to apply changes
+    restart_session
 }
 
 main "$@"
