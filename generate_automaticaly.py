@@ -77,7 +77,7 @@ def main(path_script=PATH_SCRIPT):
     markdown_content = create_markdown()
 
     # Write the markdown content to README.md
-    write_markdown_to_file("README1.md", markdown_content)
+    write_markdown_to_file("README.md", markdown_content)
 
     print("README.md file has been generated successfully.")
 
