@@ -30,8 +30,8 @@ declare -A SOFTWARE_DETAILS=(
     ["Spotify"]="install_Spotify;apt;Digital music streaming service.;https://open.spotify.com/intl-it"
     ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;"
     ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;"
-    ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;" # At the moment not working
-    ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;"
+    ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;https://azure.microsoft.com/en-us/products/storage/storage-explorer" 
+    ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;https://microk8s.io/"
 )
 
 # Function to extract the install function for a given software
