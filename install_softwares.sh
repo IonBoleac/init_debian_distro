@@ -12,7 +12,8 @@ log_message() {
         "ERROR") COLOR="\033[1;31m" ;;  # Red for ERROR
         *) COLOR="\033[0m" ;;           # Default terminal color
     esac
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S'): $COLOR$SEVERITY - $MESSAGE\033[0m" | tee -a "$LOG_FILE"
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S'): $COLOR$SEVERITY - $MESSAGE\033[0m" 
+    echo "$(date '+%Y-%m-%d %H:%M:%S'): $SEVERITY - $MESSAGE" >> "$LOG_FILE"
 }
 
 
@@ -613,7 +614,7 @@ main() {
     esac
 
     # Restart user session after installation to apply changes
-    restart_session
+    #restart_session
 }
 
 main "$@"
