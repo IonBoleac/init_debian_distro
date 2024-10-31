@@ -11,8 +11,8 @@ The following software are supported by the script:
 - [kubectl](https://kubernetes.io/docs/reference/kubectl/): command-line tool for controlling Kubernetes clusters.
 - [Node.js](https://nodejs.org/en/): JavaScript runtime built on Chrome's V8 JavaScript engine.
 - [Spotify](https://open.spotify.com/intl-it): Digital music streaming service.
-- [SQLite CLI](): command-line interface for SQLite.
-- [SQLite Browser](): Visual tool to create, design, and edit database files compatible with SQLite.
+- [SQLite CLI](https://sqlite.org/cli.html): command-line interface for SQLite.
+- [SQLite Browser](https://sqlitebrowser.org/dl/): Visual tool to create, design, and edit database files compatible with SQLite.
 - [AzureStorageExplorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer): Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.
 - [Microk8s](https://microk8s.io/): Lightweight Kubernetes for workstations and appliances.
 
