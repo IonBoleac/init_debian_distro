@@ -28,8 +28,8 @@ declare -A SOFTWARE_DETAILS=(
     ["kubectl"]="install_kubectl;curl;command-line tool for controlling Kubernetes clusters.;https://kubernetes.io/docs/reference/kubectl/"
     ["Node.js"]="install_NodeJS;curl;JavaScript runtime built on Chrome's V8 JavaScript engine.;https://nodejs.org/en/"
     ["Spotify"]="install_Spotify;apt;Digital music streaming service.;https://open.spotify.com/intl-it"
-    ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;"
-    ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;"
+    ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;https://sqlite.org/cli.html"
+    ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;https://sqlitebrowser.org/dl/"
     ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;https://azure.microsoft.com/en-us/products/storage/storage-explorer" 
     ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;https://microk8s.io/"
 )
