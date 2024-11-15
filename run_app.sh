@@ -1,20 +1,41 @@
 #!/bin/bash
 
-# Load environment variables
-#if [[ -f "./config/.env" ]]; then
-#    source "./config/.env"
-#else
-#    echo "Environment file not found!"
-#    exit 1
-#fi
+source ./config/constants.sh
 
-# Load constants
-#if [[ -f "./config/constants.sh" ]]; then
-#    source "./config/constants.sh"
-#else
-#    echo "Constants file not found!"
-#`    exit 1
-#fi
+help_message_install_software() {
+    echo
+    echo "Choosen script to install softwares!"
+    echo "Possible flags are:"
+    # Display grouped flags with descriptions, aligned in columns
+    for action in "${!FLAG_GROUPS[@]}"; do
+        case "$action" in
+            "all")
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Install all software tools without prompts"
+                ;;
+            "all-excluding")
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]} [software...]" "# Install all except specified software"
+                ;;
+            "install")
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]} [software...]" "# Specify software to install (use one or more names)"
+                ;;
+            "help")
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Show this help message"
+                ;;
+        esac
+    done
+    echo
+    echo "With the following software tools available:"
+    # Display software tools with descriptions, aligned in columns
+    for software in "${!SOFTWARE_DETAILS[@]}"; do
+        printf "  %-*s %s\n" "$COLUMN_WIDTH" "$software" "${DESCRIPTION_SOFTWARE_LIST[$software]}"
+    done
+    echo
+    echo "Example usage:"
+    printf "  %-*s %s\n" "$COLUMN_WIDTH" "-ax Brave Docker" "# Install all except Brave and Docker"
+    printf "  %-*s %s\n" "$COLUMN_WIDTH" "-i Brave Docker" "# Install only Brave and Docker"
+    echo
+    echo "CTRL+C to exit"
+}
 
 # Display menu for user to choose actions
 echo "Welcome to the setup script!"
@@ -28,8 +49,9 @@ read -p "Choose an option [1-4]: " choice
 case $choice in
     1)
         # Print the help function of the install_softwares.sh script
-        ./bin/install_softwares.sh -h
-        read -p "Flags: " flags
+
+        help_message_install_software
+        read -p "Input: " flags
 
         # Pass the flags to the install_softwares.sh script
         ./bin/install_softwares.sh "$flags"

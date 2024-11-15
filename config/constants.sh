@@ -30,6 +30,19 @@ declare -A FLAGS_DECLARATION=(
     ["-h"]="help"
 )
 
+# Use an associative array to group flags by their function
+declare -A FLAG_GROUPS
+
+# Populate FLAG_GROUPS with each action as a key and the associated flags as values
+for flag in "${!FLAGS_DECLARATION[@]}"; do
+    action="${FLAGS_DECLARATION[$flag]}"
+    if [[ -n "${FLAG_GROUPS[$action]}" ]]; then
+        FLAG_GROUPS["$action"]+=", $flag"
+    else
+        FLAG_GROUPS["$action"]="$flag"
+    fi
+done
+
 # Declare additional arrays to store install functions, methods, descriptions, and links
 declare -A INSTALL_FUNCTIONS
 declare -A METHOD_SOFTWARE_LIST
@@ -56,6 +69,6 @@ COLUMN_WIDTH=40 # column width variable needed to show correctly the helper func
 COMMANDS="wget curl git"
 
 # Declare the functions to install the software
-INSTALL_FUNCTION_SCRIPT="install_softwares.sh"
+INSTALL_FUNCTION_SCRIPT="bin/install_softwares.sh"
 
 

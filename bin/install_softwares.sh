@@ -128,34 +128,21 @@ show_help() {
     echo "The script is designed for Debian-based distributions."
     echo
     echo "Options:"
-
-    # Use an associative array to group flags by their function
-    declare -A flag_groups
-
-    # Populate flag_groups with each action as a key and the associated flags as values
-    for flag in "${!FLAGS_DECLARATION[@]}"; do
-        action="${FLAGS_DECLARATION[$flag]}"
-        if [[ -n "${flag_groups[$action]}" ]]; then
-            flag_groups["$action"]+=", $flag"
-        else
-            flag_groups["$action"]="$flag"
-        fi
-    done
-
+    
     # Display grouped flags with descriptions, aligned in columns
-    for action in "${!flag_groups[@]}"; do
+    for action in "${!FLAG_GROUPS[@]}"; do
         case "$action" in
             "all")
-                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${flag_groups[$action]}" "# Install all software tools without prompts"
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Install all software tools without prompts"
                 ;;
             "all-excluding")
-                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${flag_groups[$action]} [software...]" "# Install all except specified software"
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]} [software...]" "# Install all except specified software"
                 ;;
             "install")
-                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${flag_groups[$action]} [software...]" "# Specify software to install (use one or more names)"
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]} [software...]" "# Specify software to install (use one or more names)"
                 ;;
             "help")
-                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${flag_groups[$action]}" "# Show this help message"
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Show this help message"
                 ;;
         esac
     done
