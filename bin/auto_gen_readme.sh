@@ -47,13 +47,13 @@ The following software are supported to be installed by the script:
 # Append the usage instructions, license, and improvement sections
     markdown_content+="
 ## Usage
-Run the script \'run_app.sh\' and choose the desired option to configure your PC.
+Run the script \`run_app.sh\` and choose the desired option to configure your PC.
 
 \`\`\`bash
 ./run_app.sh
 \`\`\`
 
-After running the script, you will be prompted to choose an option to configure your PC.
+After running the script, you will be prompted to choose an option. 
 
 ### Install Software Tools Directly
 You may use the script install_softwares.sh to run the installation of the software directly.
@@ -64,7 +64,7 @@ Run the following commands to know how to use the install software script direct
 ./$INSTALL_FUNCTION_SCRIPT -h
 \`\`\`
 
-### Help command output
+### Help install softwares command output
 "
 # Append the help command output
     help_output=$(./$INSTALL_FUNCTION_SCRIPT -h)
