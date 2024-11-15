@@ -1,0 +1,45 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your main branch name if different
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run the Bash script
+        run: |
+          ./bin/auto_gen_readme.sh # Adjust to the name of your script automatically updating the README
+
+      - name: Check if README.md has been modified
+        id: check_readme
+        run: |
+          if git diff --name-only | grep -q "^README.md$"; then
+            echo "README.md has been modified."
+            echo "modified=true" >> $GITHUB_OUTPUT
+          else
+            echo "README.md has not been modified."
+            echo "modified=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes if README.md was modified
+        if: steps.check_readme.outputs.modified == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Auto-update README.md"
+          git push
+
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

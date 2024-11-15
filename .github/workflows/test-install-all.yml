@@ -1,0 +1,34 @@
+name: Test Software Installation Script
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget curl sudo apt-transport-https gnupg2 snapd
+          
+        
+      - name: Create mock .env file for Eduroam
+        run: |
+          cat <<EOT > ./config/.env
+          EDUROAM_USERNAME="testuser"
+          EDUROAM_PASSWORD="testpassword"
+          EOT
+
+      - name: Run installation script with all software
+        run: |
+          ./bin/install_softwares.sh -a
