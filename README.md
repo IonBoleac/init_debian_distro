@@ -16,13 +16,13 @@ The following software are supported to be installed by the script:
    - [AzureStorageExplorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer): Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.
 
 ## Usage
-Run the script \'run_app.sh\' and choose the desired option to configure your PC.
+Run the script `run_app.sh` and choose the desired option to configure your PC.
 
 ```bash
 ./run_app.sh
 ```
 
-After running the script, you will be prompted to choose an option to configure your PC.
+After running the script, you will be prompted to choose an option. 
 
 ### Install Software Tools Directly
 You may use the script install_softwares.sh to run the installation of the software directly.
@@ -33,7 +33,7 @@ Run the following commands to know how to use the install software script direct
 ./bin/install_softwares.sh -h
 ```
 
-### Help command output
+### Help install softwares command output
 ```bash
 Usage: ./bin/install_softwares.sh [options]
 
