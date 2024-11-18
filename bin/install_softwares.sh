@@ -96,16 +96,16 @@ is_installed() {
     if command -v "$cmd" &> /dev/null; then
         log_message "INFO" "$cmd is already installed"
         return 0
-    fi
+    
 
     # Check if the package is installed via APT
-    if dpkg -l | grep -qw "$cmd"; then
+    elif dpkg -l | grep -qw "$cmd"; then
         log_message "INFO" "$cmd is already installed via APT"
         return 0
-    fi
+    
 
     # Check if the package is installed via Snap
-    if snap list | grep -qw "$cmd"; then
+    elif snap list | grep -qw "$cmd"; then
         log_message "INFO" "$cmd is already installed via Snap"
         return 0
     fi
@@ -322,4 +322,4 @@ main() {
     
 }
 
-main "$@"
+main $*

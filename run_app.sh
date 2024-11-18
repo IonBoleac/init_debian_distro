@@ -52,7 +52,7 @@ case $choice in
 
         help_message_install_software
         read -p "Input: " flags
-
+        echo "You chose: $flags"
         # Pass the flags to the install_softwares.sh script
         ./bin/install_softwares.sh "$flags"
         ;;
