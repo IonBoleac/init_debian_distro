@@ -3,17 +3,6 @@ When you get a new PC, you need to install some basic software to make it usable
 
 ## Available Software Tools to be installed
 The following software are supported to be installed by the script:
-   - [kubectl](https://kubernetes.io/docs/reference/kubectl/): command-line tool for controlling Kubernetes clusters.
-   - [Microk8s](https://microk8s.io/): Lightweight Kubernetes for workstations and appliances.
-   - [Node.js](https://nodejs.org/en/): JavaScript runtime built on Chrome's V8 JavaScript engine.
-   - [SQLite Browser](https://sqlitebrowser.org/dl/): Visual tool to create, design, and edit database files compatible with SQLite.
-   - [SQLite CLI](https://sqlite.org/cli.html): command-line interface for SQLite.
-   - [Spotify](https://open.spotify.com/intl-it): Digital music streaming service.
-   - [GO](https://golang.org/): Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file
-   - [VSCode](https://code.visualstudio.com/): Popular code editor for developers.
-   - [Brave](https://brave.com/): Privacy-focused web browser.
-   - [Docker](https://www.docker.com/): Platform for building, sharing, and running applications with containers.
-   - [AzureStorageExplorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer): Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.
 
 ## Usage
 Run the script `run_app.sh` and choose the desired option to configure your PC.
@@ -30,38 +19,12 @@ The script will install the software and configure the PC able to use the softwa
 Run the following commands to know how to use the install software script directly:
 
 ```bash
-./bin/install_softwares.sh -h
+./ -h
 ```
 
 ### Help install softwares command output
 ```bash
-Usage: ./bin/install_softwares.sh [options]
 
-This script installs various software tools interactively or all at once. It can also exclude specific software.
-The script is designed for Debian-based distributions.
-
-Options:
-  -a, --all                                # Install all software tools without prompts
-  -i, --install [software...]              # Specify software to install (use one or more names)
-  -ax, --all-excluding [software...]       # Install all except specified software
-  -h, --help                               # Show this help message
-
-Software options for --install and --all-excluding:
-  kubectl                                  # command-line tool for controlling Kubernetes clusters. https://kubernetes.io/docs/reference/kubectl/
-  Microk8s                                 # Lightweight Kubernetes for workstations and appliances. https://microk8s.io/
-  Node.js                                  # JavaScript runtime built on Chrome's V8 JavaScript engine. https://nodejs.org/en/
-  SQLite Browser                           # Visual tool to create, design, and edit database files compatible with SQLite. https://sqlitebrowser.org/dl/
-  SQLite CLI                               # command-line interface for SQLite. https://sqlite.org/cli.html
-  Spotify                                  # Digital music streaming service. https://open.spotify.com/intl-it
-  GO                                       # Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file https://golang.org/
-  VSCode                                   # Popular code editor for developers. https://code.visualstudio.com/
-  Brave                                    # Privacy-focused web browser. https://brave.com/
-  Docker                                   # Platform for building, sharing, and running applications with containers. https://www.docker.com/
-  AzureStorageExplorer                     # Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux. https://azure.microsoft.com/en-us/products/storage/storage-explorer
-
-Example usage:
-  ./bin/install_softwares.sh -ax Brave Docker # Install all except Brave and Docker
-  ./bin/install_softwares.sh -i Brave Docker # Install only Brave and Docker
 ```
 
 ## License

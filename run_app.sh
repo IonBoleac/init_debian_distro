@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./config/constants.sh
+source ./bin/config/constants.sh
 
 help_message_install_software() {
     echo
@@ -38,35 +38,43 @@ help_message_install_software() {
 }
 
 # Display menu for user to choose actions
-echo "Welcome to the setup script!"
-echo "1. Install Software"
-echo "2. Generate README"
-echo "3. Verify Constants"
-echo "4. Exit"
+while true; do
+    echo "Welcome to the setup script!"
+    echo "1. Install Software"
+    echo "2. Generate README"
+    echo "3. Verify Constants"
+    echo "4. Exit"
 
-read -p "Choose an option [1-4]: " choice
+    read -p "Choose an option [1-4]: " choice
 
-case $choice in
-    1)
-        # Print the help function of the install_softwares.sh script
 
-        help_message_install_software
-        read -p "Input: " flags
-        echo "You chose: $flags"
-        # Pass the flags to the install_softwares.sh script
-        ./bin/install_softwares.sh "$flags"
-        ;;
-    2)
-        ./bin/auto_gen_readme.sh
-        ;;
-    3)
-        ./bin/verify_constants.sh
-        ;;
-    4)
-        echo "Goodbye!"
-        exit 0
-        ;;
-    *)
-        echo "Invalid option!"
-        ;;
-esac
+
+    case $choice in
+        1)
+            # Print the help function of the install_softwares.sh script
+
+            help_message_install_software
+            read -p "Input: " flags
+            echo "You chose: $flags"
+            # Pass the flags to the install_softwares.sh script
+            cd bin
+            echo $PWD
+            ./install_softwares.sh "$flags"
+            ;;
+        2)
+            ./bin/auto_gen_readme.sh
+            ;;
+        3)  
+            cd bin
+            ./verify_constants.sh
+            ;;
+        4)
+            echo "Goodbye!"
+            exit 0
+            ;;
+        *)
+            echo "Invalid option!"
+            ;;
+    esac
+
+done

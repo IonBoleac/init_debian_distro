@@ -115,7 +115,7 @@ is_installed() {
 }
 
 # ========= Software installation functions =========
-for file in ./bin/install_softwares/*; do
+for file in ./install_softwares/*; do
     source "$file"
 done
 
