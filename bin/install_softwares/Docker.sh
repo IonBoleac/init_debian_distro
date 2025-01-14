@@ -40,7 +40,7 @@ install_Docker() {
     # Docker command to non-sudo user
     sudo groupadd docker
     sudo usermod -aG docker "$USER"
-    newgrp docker
+    #newgrp docker
 
     log_message "INFO" "Docker successfully installed and added to user group"
 }
