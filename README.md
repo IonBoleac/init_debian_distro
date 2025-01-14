@@ -3,6 +3,18 @@ When you get a new PC, you need to install some basic software to make it usable
 
 ## Available Software Tools to be installed
 The following software are supported to be installed by the script:
+   - [kubectl](https://kubernetes.io/docs/reference/kubectl/): command-line tool for controlling Kubernetes clusters.
+   - [Microk8s](https://microk8s.io/): Lightweight Kubernetes for workstations and appliances.
+   - [Node.js](https://nodejs.org/en/): JavaScript runtime built on Chrome's V8 JavaScript engine.
+   - [SQLite Browser](https://sqlitebrowser.org/dl/): Visual tool to create, design, and edit database files compatible with SQLite.
+   - [SQLite CLI](https://sqlite.org/cli.html): command-line interface for SQLite.
+   - [Spotify](https://open.spotify.com/intl-it): Digital music streaming service.
+   - [GO](https://golang.org/): Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file
+   - [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/): Customization of Kubernetes YAML configurations.
+   - [VSCode](https://code.visualstudio.com/): Popular code editor for developers.
+   - [Brave](https://brave.com/): Privacy-focused web browser.
+   - [Docker](https://www.docker.com/): Platform for building, sharing, and running applications with containers.
+   - [AzureStorageExplorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer): Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.
 
 ## Usage
 Run the script `run_app.sh` and choose the desired option to configure your PC.
@@ -19,7 +31,7 @@ The script will install the software and configure the PC able to use the softwa
 Run the following commands to know how to use the install software script directly:
 
 ```bash
-./ -h
+./bin/install_softwares.sh -h
 ```
 
 ### Help install softwares command output
