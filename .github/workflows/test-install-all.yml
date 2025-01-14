@@ -22,12 +22,12 @@ jobs:
           sudo apt-get install -y wget curl sudo apt-transport-https gnupg2 snapd
           
         
-      - name: Create mock .env file for Eduroam
-        run: |
-          cat <<EOT > ./config/.env
-          EDUROAM_USERNAME="testuser"
-          EDUROAM_PASSWORD="testpassword"
-          EOT
+      #- name: Create mock .env file for Eduroam
+      #  run: |
+      #    cat <<EOT > ./config/.env
+      #    EDUROAM_USERNAME="testuser"
+      #    EDUROAM_PASSWORD="testpassword"
+      #    EOT
 
       - name: Run installation script with all software
         run: |
