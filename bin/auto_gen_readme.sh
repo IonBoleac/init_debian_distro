@@ -3,6 +3,8 @@
 # Load constants
 source ./config/constants.sh
 
+INSTALL_FUNCTION_SCRIPT="install_softwares.sh"
+
 # Function to extract software details by key
 get_software_detail() {
     local software_name="$1"
@@ -58,7 +60,13 @@ After running the script, you will be prompted to choose an option.
 ### Install Software Tools Directly
 You may use the script install_softwares.sh to run the installation of the software directly.
 The script will install the software and configure the PC able to use the software properly. 
-Run the following commands to know how to use the install software script directly:
+In first, you must change working directory using:
+
+\`\`\`bash
+cd bin
+\`\`\`
+
+After that follow the bellow commands to know how to use the install software script directly:
 
 \`\`\`bash
 ./$INSTALL_FUNCTION_SCRIPT -h
