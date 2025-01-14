@@ -62,7 +62,10 @@ while true; do
             ./install_softwares.sh "$flags"
             ;;
         2)
-            ./bin/auto_gen_readme.sh
+            cd bin
+            ./auto_gen_readme.sh
+            cp -f README.md ../
+            rm README.md
             ;;
         3)  
             cd bin
