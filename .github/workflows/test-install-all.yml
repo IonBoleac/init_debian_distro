@@ -31,4 +31,5 @@ jobs:
 
       - name: Run installation script with all software
         run: |
-          ./bin/install_softwares.sh -a
+          cd bin
+          ./install_softwares.sh -a
