@@ -18,7 +18,10 @@ jobs:
 
       - name: Run the Bash script
         run: |
-          ./bin/auto_gen_readme.sh # Adjust to the name of your script automatically updating the README
+          cd bin
+          ./auto_gen_readme.sh # Adjust to the name of your script automatically updating the README
+          cp -f README.md ../
+          rm README.md
 
       - name: Check if README.md has been modified
         id: check_readme
