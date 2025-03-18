@@ -1,4 +1,4 @@
-# Initialize a new Debian based PC
+# Initialize a new Ubuntu based PC
 When you get a new PC, you need to install some basic software to make it usable. You can use the following repo to install the essential software you need and configure your PC. In this repo there are scripts to install software and configure the PC.
 
 ## Available Software Tools to be installed
@@ -12,7 +12,9 @@ The following software are supported to be installed by the script:
    - [GO](https://golang.org/): Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file
    - [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/): Customization of Kubernetes YAML configurations.
    - [VSCode](https://code.visualstudio.com/): Popular code editor for developers.
+   - [Helm](https://helm.sh/): Package manager for Kubernetes.
    - [Brave](https://brave.com/): Privacy-focused web browser.
+   - [kind](https://kind.sigs.k8s.io/): Tool for running local Kubernetes clusters using Docker container nodes.
    - [Docker](https://www.docker.com/): Platform for building, sharing, and running applications with containers.
    - [AzureStorageExplorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer): Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.
 
@@ -45,7 +47,7 @@ After that follow the bellow commands to know how to use the install software sc
 Usage: ./install_softwares.sh [options]
 
 This script installs various software tools interactively or all at once. It can also exclude specific software.
-The script is designed for Debian-based distributions.
+The script is designed for Ubuntu-based distributions.
 
 Options:
   -a, --all                                # Install all software tools without prompts
@@ -63,7 +65,9 @@ Software options for --install and --all-excluding:
   GO                                       # Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file https://golang.org/
   kustomize                                # Customization of Kubernetes YAML configurations. https://kubectl.docs.kubernetes.io/installation/kustomize/
   VSCode                                   # Popular code editor for developers. https://code.visualstudio.com/
+  Helm                                     # Package manager for Kubernetes. https://helm.sh/
   Brave                                    # Privacy-focused web browser. https://brave.com/
+  kind                                     # Tool for running local Kubernetes clusters using Docker container nodes. https://kind.sigs.k8s.io/
   Docker                                   # Platform for building, sharing, and running applications with containers. https://www.docker.com/
   AzureStorageExplorer                     # Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux. https://azure.microsoft.com/en-us/products/storage/storage-explorer
 
