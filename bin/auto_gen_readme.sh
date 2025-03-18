@@ -32,7 +32,7 @@ example_usage() {
 # Main function to display all software details in markdown format
 create_markdown() {
     # Begin markdown content
-    markdown_content="# Initialize a new Debian based PC
+    markdown_content="# Initialize a new Ubuntu based PC
 When you get a new PC, you need to install some basic software to make it usable. You can use the following repo to install the essential software you need and configure your PC. In this repo there are scripts to install software and configure the PC.
 
 ## Available Software Tools to be installed

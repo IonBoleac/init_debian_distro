@@ -16,6 +16,8 @@ declare -A SOFTWARE_DETAILS=(
     ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;https://azure.microsoft.com/en-us/products/storage/storage-explorer" 
     ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;https://microk8s.io/"
     ["GO"]="install_GO;tar;Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file;https://golang.org/"
+    ["kind"]="install_kind;curl;Tool for running local Kubernetes clusters using Docker container nodes.;https://kind.sigs.k8s.io/"
+    ["Helm"]="install_Helm;curl;Package manager for Kubernetes.;https://helm.sh/"
     #["test"]="test;test;test;test"
 )
 
