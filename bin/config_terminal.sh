@@ -30,6 +30,7 @@ do
     read res
     case $res in
         y)
+            chmod +x $TERMINAL_CONFIG/nvim.sh
             sh $TERMINAL_CONFIG/nvim.sh
             break
         ;;
@@ -80,6 +81,7 @@ else
 fi
 
 # Fonts
+chmod +x $TERMINAL_CONFIG/font.sh
 sh $TERMINAL_CONFIG/font.sh
 
 echo "Installation complete. Close and re-open the terminal. Then Run \"zsh\" and have a nice day!"
