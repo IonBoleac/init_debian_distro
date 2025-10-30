@@ -27,7 +27,7 @@ sudo apt install -y most
 # Install Neovim
 echo "Would you like to install neovim at the latest version, with lazyvim configuration? [y|n]"
 
-if [ "$AUTOMATIC_START" == "yes" ]; then
+if [ "$AUTOMATIC_START" == "true" ]; then
     res="y"
     echo "Automatic installation started."
 else
