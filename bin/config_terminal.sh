@@ -2,6 +2,8 @@
 
 TERMINAL_CONFIG="./terminal_config"
 
+AUTOMATIC_START=$1
+
 set -e
 
 sudo apt update -y
@@ -24,6 +26,13 @@ sudo apt install -y most
 
 # Install Neovim
 echo "Would you like to install neovim at the latest version, with lazyvim configuration? [y|n]"
+
+if [ "$AUTOMATIC_START" == "yes" ]; then
+    res="y"
+    echo "y"
+else
+    res=""
+fi
 
 while :
 do
