@@ -2,6 +2,8 @@
 
 source ./bin/config/constants.sh
 
+export PARENT_DIRECTORY="$(pwd)"
+
 help_message_install_software() {
     echo
     echo "Choosen script to install softwares!"
@@ -39,13 +41,15 @@ help_message_install_software() {
 
 # Display menu for user to choose actions
 while true; do
+    cd "$PARENT_DIRECTORY" || exit 1
     echo "Welcome to the setup script!"
     echo "1. Install Software"
     echo "2. Generate README"
     echo "3. Verify Constants"
-    echo "4. Exit"
+    echo "4. Config Terminal"
+    echo "9. Exit"
 
-    read -p "Choose an option [1-4]: " choice
+    read -p "Choose an option [1-4, 9]: " choice
 
 
 
@@ -72,6 +76,10 @@ while true; do
             ./verify_constants.sh
             ;;
         4)
+            cd bin
+            ./config_terminal.sh
+            ;;
+        9)
             echo "Goodbye!"
             exit 0
             ;;
