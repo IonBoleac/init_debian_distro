@@ -29,7 +29,7 @@ echo "Would you like to install neovim at the latest version, with lazyvim confi
 
 if [ "$AUTOMATIC_START" == "yes" ]; then
     res="y"
-    echo "y"
+    echo "Automatic installation started."
 else
     res=""
 fi
