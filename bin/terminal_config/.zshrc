@@ -118,7 +118,9 @@ export EDITOR=nano
 # EZA
 if [ -x "$(command -v eza)" ]; then
     alias ls="eza --icons"
-    alias la="eza --all --long --header --icons --git"
+    alias la="eza --all --long --header --git --icons"
+    alias ll="eza --long --header --git --icons"
+    alias lt="eza --tree --level=2 --icons"
 fi
 # BATCAT
 if [ -x "$(command -v batcat)" ]; then

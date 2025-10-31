@@ -39,3 +39,7 @@ else
     echo "Fonts installed. Close and re-open this terminal, open the preferences of your terminal and choose 'MesloLGS NF' as font."
 
 fi
+
+echo ""
+echo "Whether you are using Windows Terminal or another terminal, remember to set the font to 'MesloLGS NF'."
+echo "Remember to download the 'MesloLGS NF' fonts for Windows and install them."
