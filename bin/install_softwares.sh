@@ -74,11 +74,11 @@ apt_update() {
     #sudo apt-get autoremove -y >> /dev/null 2>> "$LOG_FILE"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "System update and upgrade failed"
+        log_message "ERROR" "System update failed"
         return 1
     fi
 
-    log_message "INFO" "System successfully updated and upgraded"
+    log_message "INFO" "System successfully updated"
 }
 
 # Restart user session

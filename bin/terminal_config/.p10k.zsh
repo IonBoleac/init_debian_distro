@@ -32,7 +32,7 @@
   # The list of segments shown on the left. Fill it with the most important segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # =========================[ Line #1 ]=========================
-    # os_icon               # os identifier
+    os_icon               # os identifier
     dir                     # current directory
     vcs                     # git status
     # =========================[ Line #2 ]=========================
@@ -1261,12 +1261,32 @@
   #   typeset -g POWERLEVEL9K_KUBECONTEXT_TEST_FOREGROUND=28
   #   typeset -g POWERLEVEL9K_KUBECONTEXT_TEST_VISUAL_IDENTIFIER_EXPANSION='⭐'
   #   typeset -g POWERLEVEL9K_KUBECONTEXT_TEST_CONTENT_EXPANSION='> ${P9K_CONTENT} <'
+  #
+  # 1. DEFINIZIONE DELLE CLASSI
+  # Assegna una classe al contesto corrente in base al nome. L'ordine è importante.
   typeset -g POWERLEVEL9K_KUBECONTEXT_CLASSES=(
-      # '*prod*'  PROD    # These values are examples that are unlikely
-      # '*test*'  TEST    # to match your needs. Customize them as needed.
+      # Contesti di produzione (cattura sia "prod" che "prd")
+      '*prod*'  PROD
+      '*prd*'   PROD
+      # Contesti di sviluppo/stage (cattura sia "dev" che "stage")
+      '*dev*'   DEV
+      '*stage*' DEV
+      # Tutti gli altri contesti
       '*'       DEFAULT)
-  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND=134
-  # typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_VISUAL_IDENTIFIER_EXPANSION='⭐'
+
+  # 2. PERSONALIZZAZIONE DELLO STILE (COLORI E ICONE) PER OGNI CLASSE
+
+  # Stile per la classe PROD (Produzione)
+  typeset -g POWERLEVEL9K_KUBECONTEXT_PROD_FOREGROUND=196    # Rosso vivo
+  typeset -g POWERLEVEL9K_KUBECONTEXT_PROD_VISUAL_IDENTIFIER_EXPANSION='🔥'
+
+  # Stile per la classe DEV (Sviluppo e Stage)
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEV_FOREGROUND=70      # Verde
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEV_VISUAL_IDENTIFIER_EXPANSION='🛠️'
+
+  # Stile per la classe DEFAULT (Tutti gli altri)
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND=244 # Grigio
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
   # Use POWERLEVEL9K_KUBECONTEXT_CONTENT_EXPANSION to specify the content displayed by kubecontext
   # segment. Parameter expansions are very flexible and fast, too. See reference:
@@ -1313,6 +1333,13 @@
   POWERLEVEL9K_KUBECONTEXT_DEFAULT_CONTENT_EXPANSION+='${P9K_KUBECONTEXT_CLOUD_CLUSTER:-${P9K_KUBECONTEXT_NAME}}'
   # Append the current context's namespace if it's not "default".
   POWERLEVEL9K_KUBECONTEXT_DEFAULT_CONTENT_EXPANSION+='${${:-/$P9K_KUBECONTEXT_NAMESPACE}:#/default}'
+  # Definiamo un formato di testo comune e pulito:
+  # - Mostra il nome breve del cluster (se è GKE/EKS), altrimenti il nome completo.
+  # - Aggiunge "/<namespace>" solo se il namespace è diverso da "default".
+  # typeset -g POWERLEVEL9K_KUBECONTEXT_PROD_CONTENT_EXPANSION='${P9K_KUBECONTEXT_CLOUD_CLUSTER:-${P9K_KUBECONTEXT_NAME}}${${:-/$P9K_KUBECONTEXT_NAMESPACE}:#/default}'
+  # typeset -g POWERLEVEL9K_KUBECONTEXT_DEV_CONTENT_EXPANSION='${P9K_KUBECONTEXT_CLOUD_CLUSTER:-${P9K_KUBECONTEXT_NAME}}${${:-/$P9K_KUBECONTEXT_NAMESPACE}:#/default}'
+  # typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_CONTENT_EXPANSION='${P9K_KUBECONTEXT_CLOUD_CLUSTER:-${P9K_KUBECONTEXT_NAME}}${${:-/$P9K_KUBECONTEXT_NAMESPACE}:#/default}'
+
 
   # Custom prefix.
   # typeset -g POWERLEVEL9K_KUBECONTEXT_PREFIX='%fat '

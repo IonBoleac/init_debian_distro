@@ -136,3 +136,17 @@ fi
 if [ -x "$(command -v kubectl)" ]; then
     source <(kubectl completion zsh)
 fi
+
+# crd-wizard autocompletion
+if [ -x "$(command -v crd-wizard)" ]; then
+    source <(crd-wizard completion zsh)
+fi
+
+# NVM (Node Version Manager) controll if .nvm directory exists
+
+if [ -d "$HOME/.nvm" ]; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
+

@@ -1,0 +1,25 @@
+#!/bin/bash
+# script to installa nvm
+
+install_nvm() {
+    log_message "INFO" "Installing nvm in progress..."
+    # Verify if nvm is already installed
+    is_installed "nvm" && return
+    # if is_installed "nvm"; then
+    #     log_message "INFO" "nvm is already installed."
+    #     read -p "Do you want to reinstall with the newest nvm? (y/n): " choice
+    #     case "$choice" in
+    #         y|Y ) log_message "INFO" "Reinstalling nvm...";;
+    #         n|N ) log_message "INFO" "Skipping nvm installation."; return;;
+    #         * ) log_message "INFO" "Invalid choice. Skipping nvm installation."; return;;
+    #     esac
+    # fi
+
+    verify_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
+    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
+    source ~/.bashrc
+    log_message "INFO" "NVM successfully installed and configured"
+    verify_command "nvm -v"
+}

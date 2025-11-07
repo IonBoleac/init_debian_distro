@@ -6,6 +6,15 @@ install_kubectl() {
     log_message "INFO" "Installing kubectl in progress..."
     # Verify if kubectl is already installed
     is_installed "kubectl" && return
+    # if is_installed "kubectl"; then
+    #     log_message "INFO" "kubectl is already installed."
+    #     read -p "Do you want to reinstall with the newest kubectl? (y/n): " choice
+    #     case "$choice" in
+    #         y|Y ) log_message "INFO" "Reinstalling kubectl...";;
+    #         n|N ) log_message "INFO" "Skipping kubectl installation."; return;;
+    #         * ) log_message "INFO" "Invalid choice. Skipping kubectl installation."; return;;
+    #     esac
+    # fi
 
     # Download kubectl
     verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl""
@@ -54,4 +63,7 @@ install_kubectl() {
         FAILED_INSTALLATIONS+=("kubectl")
         return
     fi
+
+    # Clean up
+    rm kubectl kubectl.sha256
 }
