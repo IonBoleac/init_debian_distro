@@ -71,13 +71,13 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 # Setting .zshrc file
-if [ -f .zshrc ]; then
+if [ -f  $HOME/.zshrc ]; then
     echo "Restoring .zshrc"
     if [ -f $HOME/.zshrc ]; then
         cp $HOME/.zshrc $HOME/.zshrc_bckp
     fi
     cp $TERMINAL_CONFIG/.zshrc $HOME/.zshrc
-    if [ -f .p10k.zsh ]; then
+    if [ -f $HOME/.p10k.zsh ]; then
         echo "Restoring .p10k.zsh"
         if [ -f $HOME/.p10k.zsh ]; then
             cp $HOME/.p10k.zsh $HOME/.p10k.zsh_bckp

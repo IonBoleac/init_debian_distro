@@ -10,7 +10,7 @@ wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20B
 wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
 wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
 
-mkdir ~/.local/share/fonts
+mkdir -p ~/.local/share/fonts
 
 mv *.ttf ~/.local/share/fonts
 
