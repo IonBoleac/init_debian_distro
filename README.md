@@ -12,6 +12,8 @@ The following software are supported to be installed by the script:
    - [GO](https://golang.org/): Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file
    - [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/): Customization of Kubernetes YAML configurations.
    - [VSCode](https://code.visualstudio.com/): Popular code editor for developers.
+   - [k9s](https://github.com/derailed/k9s): Kubernetes CLI to manage and observe your clusters in style.
+   - [nvm](https://github.com/nvm-sh/nvm#installing-and-updating): Node Version Manager - manages multiple Node.js versions.
    - [Helm](https://helm.sh/): Package manager for Kubernetes.
    - [Brave](https://brave.com/): Privacy-focused web browser.
    - [kind](https://kind.sigs.k8s.io/): Tool for running local Kubernetes clusters using Docker container nodes.
@@ -65,6 +67,8 @@ Software options for --install and --all-excluding:
   GO                                       # Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file https://golang.org/
   kustomize                                # Customization of Kubernetes YAML configurations. https://kubectl.docs.kubernetes.io/installation/kustomize/
   VSCode                                   # Popular code editor for developers. https://code.visualstudio.com/
+  k9s                                      # Kubernetes CLI to manage and observe your clusters in style. https://github.com/derailed/k9s
+  nvm                                      # Node Version Manager - manages multiple Node.js versions. https://github.com/nvm-sh/nvm#installing-and-updating
   Helm                                     # Package manager for Kubernetes. https://helm.sh/
   Brave                                    # Privacy-focused web browser. https://brave.com/
   kind                                     # Tool for running local Kubernetes clusters using Docker container nodes. https://kind.sigs.k8s.io/
