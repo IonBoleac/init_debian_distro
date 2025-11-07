@@ -23,3 +23,4 @@ jobs:
           ./config_terminal.sh true
           zsh
           echo "Terminal configuration script executed successfully."
+          p10k help
