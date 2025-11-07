@@ -32,4 +32,4 @@ jobs:
       - name: Run installation script with all software
         run: |
           cd bin
-          ./install_softwares.sh -a
+          ./install_softwares.sh -ax Spotify

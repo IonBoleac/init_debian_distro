@@ -21,3 +21,5 @@ jobs:
           cd bin 
           chmod +x config_terminal.sh
           ./config_terminal.sh true
+          zsh
+          echo "Terminal configuration script executed successfully."
