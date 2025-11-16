@@ -27,8 +27,6 @@ sudo apt install -y most
 # Install Neovim
 echo "Would you like to install neovim at the latest version, with lazyvim configuration? [y|n]"
 
-
-
 while :
 do
     if [ "$AUTOMATIC_START" == "true" ]; then
@@ -36,24 +34,27 @@ do
         echo "Automatic installation started."
     else
         read -n 1 res
+        echo ""  # Add newline after reading single character
     fi
     
     case $res in
-        y)
+        y|Y)
             chmod +x $TERMINAL_CONFIG/nvim.sh
             sh $TERMINAL_CONFIG/nvim.sh
             break
         ;;
-        n)
+        n|N)
+            echo "Skipping Neovim installation."
             break
         ;;
         *)
-        echo "Please type 'y' or 'n'"
+            echo "Please type 'y' or 'n'"
+        ;;
     esac
 done
 
 # Oh-my-zsh
-mkdir ohmyzsh
+mkdir -p ohmyzsh
 cd ohmyzsh
 if curl -fsLO https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh; then
     sed -i 's/exec zsh -l/#exec zsh -l/g' ./install.sh
@@ -70,25 +71,17 @@ git clone https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-m
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
-# Setting .zshrc file
-if [ -f  $HOME/.zshrc ]; then
-    echo "Restoring .zshrc"
-    if [ -f $HOME/.zshrc ]; then
-        cp $HOME/.zshrc $HOME/.zshrc_bckp
-    fi
-    cp $TERMINAL_CONFIG/.zshrc $HOME/.zshrc
-    if [ -f $HOME/.p10k.zsh ]; then
-        echo "Restoring .p10k.zsh"
-        if [ -f $HOME/.p10k.zsh ]; then
-            cp $HOME/.p10k.zsh $HOME/.p10k.zsh_bckp
-        fi
-        cp $TERMINAL_CONFIG/.p10k.zsh $HOME/.p10k.zsh
-    else
-        echo "Error restoring .p10k.zsh"
-    fi
-else
-    echo "Error restoring .zshrc"
+
+
+if [ -f $HOME/.zshrc ]; then
+    cp $HOME/.zshrc $HOME/.zshrc_bckp
 fi
+cp $TERMINAL_CONFIG/.zshrc $HOME/.zshrc
+
+if [ -f $HOME/.p10k.zsh ]; then
+    cp $HOME/.p10k.zsh $HOME/.p10k.zsh_bckp
+fi
+cp $TERMINAL_CONFIG/.p10k.zsh $HOME/.p10k.zsh
 
 # Fonts
 chmod +x $TERMINAL_CONFIG/font.sh
