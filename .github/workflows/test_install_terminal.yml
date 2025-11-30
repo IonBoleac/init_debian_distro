@@ -19,6 +19,7 @@ jobs:
       - name: Run installation script with all software
         run: |
           cd bin 
+          export AUTOMATIC_STARTUP=true
           chmod +x config_terminal.sh
           ./config_terminal.sh true
           zsh

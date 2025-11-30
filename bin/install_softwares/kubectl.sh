@@ -66,4 +66,40 @@ install_kubectl() {
 
     # Clean up
     rm kubectl kubectl.sha256
+
+    # Install krew (kubectl plugin manager)
+    echo "Would you like to install krew at the latest version? [y|n]"
+    while :
+    do
+        if [ "$AUTOMATIC_START" == "true" ]; then
+            res="y"
+            echo "Automatic installation started."
+        else
+            read -n 1 res
+            echo ""  # Add newline after reading single character
+        fi
+        
+        case $res in
+            y|Y)
+                (
+                    set -x; cd "$(mktemp -d)" &&
+                    OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+                    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+                    KREW="krew-${OS}_${ARCH}" &&
+                    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+                    tar zxvf "${KREW}.tar.gz" &&
+                    ./"${KREW}" install krew
+                )
+                break
+            ;;
+            n|N)
+                echo "Skipping krew installation."
+                break
+            ;;
+            *)
+                echo "Please type 'y' or 'n'"
+            ;;
+        esac
+    done
+
 }
