@@ -9,7 +9,7 @@ install_browser-SQLite() {
     verify_command "sudo apt-get install sqlitebrowser -y"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to install SQLite Browser"
+        log_message "ERROR" "Failed to install SQLite Browser. Run 'sudo apt-get update' and check repository access."
         FAILED_INSTALLATIONS+=("SQLite Browser")
         return
     fi

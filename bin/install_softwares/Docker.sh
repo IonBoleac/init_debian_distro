@@ -14,7 +14,7 @@ install_Docker() {
     verify_command "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc"
     # verify if the download was successful
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download Docker GPG key"
+        log_message "ERROR" "Failed to download Docker GPG key. Check internet connection and permissions for /etc/apt/keyrings/"
         FAILED_INSTALLATIONS+=("Docker")
         return
     fi
@@ -32,7 +32,7 @@ install_Docker() {
     verify_command "apt_get_install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to install Docker"
+        log_message "ERROR" "Failed to install Docker. Run 'sudo apt-get update' and check repository configuration. See logs for details."
         FAILED_INSTALLATIONS+=("Docker")
         return
     fi

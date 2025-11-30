@@ -11,8 +11,9 @@ install_VSCode() {
 
     # verify if the download was successful
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download VSCode"
+        log_message "ERROR" "Failed to download VSCode. Check your internet connection or download manually from https://code.visualstudio.com/"
         FAILED_INSTALLATIONS+=("VSCode")
+        rm -f vscode.deb
         return
     fi
 
@@ -20,10 +21,14 @@ install_VSCode() {
 
     # verify if the installation was successful
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to install VSCode"
+        log_message "ERROR" "Failed to install VSCode. Try running 'sudo apt-get install -f' to fix dependencies, then retry."
         FAILED_INSTALLATIONS+=("VSCode")
+        rm -f vscode.deb
         return
     fi
+
+    # Clean up downloaded file
+    rm -f vscode.deb
 
     echo "VSCode installed"
     log_message "INFO" "VSCode successfully installed"

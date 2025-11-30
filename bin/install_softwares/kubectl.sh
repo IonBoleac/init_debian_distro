@@ -20,7 +20,7 @@ install_kubectl() {
     verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl""
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download kubectl"
+        log_message "ERROR" "Failed to download kubectl. Check your internet connection or try manually: curl -LO https://dl.k8s.io/release/stable.txt"
         FAILED_INSTALLATIONS+=("kubectl")
         return
     fi
@@ -30,7 +30,7 @@ install_kubectl() {
     verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256""
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download kubectl.sha256"
+        log_message "ERROR" "Failed to download kubectl.sha256. Check your internet connection and try again."
         FAILED_INSTALLATIONS+=("kubectl")
         return
     fi
@@ -59,13 +59,14 @@ install_kubectl() {
 
         log_message "INFO" "kubectl successfully installed and .kube directory created"
     else
-        log_message "ERROR" "Checksum verification failed"
+        log_message "ERROR" "Checksum verification failed. Downloaded file may be corrupted. Please delete kubectl and retry the installation."
         FAILED_INSTALLATIONS+=("kubectl")
+        rm -f kubectl kubectl.sha256
         return
     fi
 
     # Clean up
-    rm kubectl kubectl.sha256
+    rm -f kubectl kubectl.sha256
 
     # Install krew (kubectl plugin manager)
     echo "Would you like to install krew at the latest version? [y|n]"
@@ -88,7 +89,8 @@ install_kubectl() {
                     KREW="krew-${OS}_${ARCH}" &&
                     curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
                     tar zxvf "${KREW}.tar.gz" &&
-                    ./"${KREW}" install krew
+                    ./"${KREW}" install krew &&
+                    rm -f "${KREW}.tar.gz" "${KREW}"
                 )
                 break
             ;;

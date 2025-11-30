@@ -10,7 +10,7 @@ install_kustomize() {
     curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download kustomize"
+        log_message "ERROR" "Failed to download kustomize. Check internet connection or try manual install from https://kubectl.docs.kubernetes.io/installation/kustomize/"
         FAILED_INSTALLATIONS+=("kustomize")
         return
     fi
@@ -22,12 +22,15 @@ install_kustomize() {
         # Install kustomize
         sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
 
+        # Clean up downloaded file
+        rm -f kustomize
+
         # Verify the installation
         kustomize version
 
         log_message "INFO" "kustomize successfully installed"
     else
-        log_message "ERROR" "Failed to download kustomize binary"
+        log_message "ERROR" "Failed to download kustomize binary. Installation script did not produce expected output. Check logs for details."
         FAILED_INSTALLATIONS+=("kustomize")
         return
     fi

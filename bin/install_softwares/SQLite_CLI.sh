@@ -10,7 +10,7 @@ intall_SQLite_CLI() {
     verify_command "sudo apt-get install sqlite3 -y"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to install SQLite"
+        log_message "ERROR" "Failed to install SQLite. Run 'sudo apt-get update' and check repository access."
         FAILED_INSTALLATIONS+=("SQLite")
         return
     fi

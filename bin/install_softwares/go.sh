@@ -19,15 +19,17 @@ install_GO() {
     verify_command "wget $GO_URL"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download GO $GO_TAR_FILE tar file"
+        log_message "ERROR" "Failed to download GO $GO_TAR_FILE. Check internet connection or try manual download from https://go.dev/dl/"
         FAILED_INSTALLATIONS+=("GO")
+        rm -f "$GO_TAR_FILE"
         return
     fi
 
     tar -xzf $GO_TAR_FILE
     cp -r go ~/
+    
+    # Clean up downloaded and extracted files
     rm -rf go $GO_TAR_FILE
-    rm -rf go
 
     # Add GO to PATH in .bashrc
     echo "export GOPATH=$GO_DIRECTORY" >> ~/.bashrc

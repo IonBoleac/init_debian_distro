@@ -11,7 +11,7 @@ declare -a FAILED_INSTALLATIONS
 
 # Funtion to verify if the command are gone or not
 verify_command() {
-    eval "$@" > /dev/null 2>> "$LOG_FILE"
+    "$@" > /dev/null 2>> "$LOG_FILE"
     local status=$?
 
     if [ $status -ne 0 ]; then
@@ -46,8 +46,9 @@ init_script() {
         USER_SHELL="bash"
         log_message "INFO" "Bash shell detected"
     else
-        log_message "ERROR" "Unknown shell: $SHELL"
+        log_message "ERROR" "Unknown shell: $SHELL. Supported shells: bash, zsh. Please switch to a supported shell and try again."
     fi
+    export USER_SHELL
 
 
     # Verify wich type of OS is running
@@ -56,11 +57,11 @@ init_script() {
         if [[ "$ID" == "debian" || "$ID_LIKE" == *"debian"* ]]; then
             log_message "INFO" "Debian based distribution detected"
         else
-            log_message "ERROR" "This script is only for Debian based distributions"
+            log_message "ERROR" "This script is only for Debian based distributions. Detected: $ID. Please use Ubuntu, Debian, or derivatives."
             exit 1
         fi
     else
-        log_message "ERROR" "This script is only for Devian based distributions"
+        log_message "ERROR" "Cannot detect OS. File /etc/os-release not found. This script requires a Debian-based distribution."
         exit 1
     fi
 }
@@ -74,7 +75,7 @@ apt_update() {
     #sudo apt-get autoremove -y >> /dev/null 2>> "$LOG_FILE"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "System update failed"
+        log_message "ERROR" "System update failed. Check your internet connection and repository configuration. Run 'sudo apt-get update' manually for details."
         return 1
     fi
 
@@ -239,7 +240,7 @@ install_functions() {
             if [[ -n "${INSTALL_FUNCTIONS[$software]}" ]]; then
                 ${INSTALL_FUNCTIONS[$software]}
             else
-                log_message "ERROR" "Unknown software: $software"
+                log_message "ERROR" "Unknown software: $software. Available options: ${!INSTALL_FUNCTIONS[*]}"
             fi
         done
     else

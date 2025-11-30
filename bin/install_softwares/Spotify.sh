@@ -10,7 +10,7 @@ install_Spotify() {
     verify_command "curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to download Spotify repository signing keys"
+        log_message "ERROR" "Failed to download Spotify repository signing keys. Check internet connection and gpg installation."
         FAILED_INSTALLATIONS+=("Spotify")
         return
     fi
@@ -25,7 +25,7 @@ install_Spotify() {
     verify_command "sudo apt-get install spotify-client -y"
 
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to install Spotify"
+        log_message "ERROR" "Failed to install Spotify. Run 'sudo apt-get update' and verify repository was added correctly."
         FAILED_INSTALLATIONS+=("Spotify")
         return
     fi

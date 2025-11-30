@@ -23,6 +23,7 @@ declare -A SOFTWARE_DETAILS=(
 
     #["test"]="test;test;test;test"
 )
+export SOFTWARE_DETAILS
 
 # Flag mappings for parsing
 declare -A FLAGS_DECLARATION=(
@@ -35,6 +36,7 @@ declare -A FLAGS_DECLARATION=(
     ["--help"]="help"
     ["-h"]="help"
 )
+export FLAGS_DECLARATION
 
 # Use an associative array to group flags by their function
 declare -A FLAG_GROUPS
@@ -48,6 +50,7 @@ for flag in "${!FLAGS_DECLARATION[@]}"; do
         FLAG_GROUPS["$action"]="$flag"
     fi
 done
+export FLAG_GROUPS
 
 # Declare additional arrays to store install functions, methods, descriptions, and links
 declare -A INSTALL_FUNCTIONS
@@ -66,15 +69,25 @@ for software in "${!SOFTWARE_DETAILS[@]}"; do
     DESCRIPTION_SOFTWARE_LIST["$software"]="$description"
     LINK_SOFTWARE_LIST["$software"]="$link"
 done
+export INSTALL_FUNCTIONS
+export METHOD_SOFTWARE_LIST
+export DESCRIPTION_SOFTWARE_LIST
+export LINK_SOFTWARE_LIST
 
 # Constants
 LOG_FILE="logs.log"
+export LOG_FILE
+export LOG_FILE
+
 COLUMN_WIDTH=40 # column width variable needed to show correctly the helper function
+export COLUMN_WIDTH
 
 # commands needed to run the script like wget, curl save in a variable
 COMMANDS="wget curl git"
+export COMMANDS
 
 # Declare the functions to install the software
 INSTALL_FUNCTION_SCRIPT="bin/install_softwares.sh"
+export INSTALL_FUNCTION_SCRIPT
 
 
