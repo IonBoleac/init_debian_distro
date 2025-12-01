@@ -20,6 +20,9 @@ help_message_install_software() {
             "install")
                 printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]} [software...]" "# Specify software to install (use one or more names)"
                 ;;
+            "dry-run")
+                printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Preview actions without installing (dry-run mode)"
+                ;;
             "help")
                 printf "  %-*s %s\n" "$COLUMN_WIDTH" "${FLAG_GROUPS[$action]}" "# Show this help message"
                 ;;
@@ -35,6 +38,8 @@ help_message_install_software() {
     echo "Example usage:"
     printf "  %-*s %s\n" "$COLUMN_WIDTH" "-ax Brave Docker" "# Install all except Brave and Docker"
     printf "  %-*s %s\n" "$COLUMN_WIDTH" "-i Brave Docker" "# Install only Brave and Docker"
+    printf "  %-*s %s\n" "$COLUMN_WIDTH" "-d -i VSCode Docker" "# Preview VSCode and Docker installation"
+    printf "  %-*s %s\n" "$COLUMN_WIDTH" "--dry-run -a" "# Preview all installations"
     echo
     echo "CTRL+C to exit"
 }
@@ -61,22 +66,23 @@ while true; do
             read -p "Input: " flags
             echo "You chose: $flags"
             # Pass the flags to the install_softwares.sh script
-            cd bin
+            cd bin || exit 1
             echo $PWD
-            ./install_softwares.sh "$flags"
+            # shellcheck disable=SC2086
+            ./install_softwares.sh $flags
             ;;
         2)
-            cd bin
+            cd bin || exit 1
             ./auto_gen_readme.sh
             cp -f README.md ../
             rm README.md
             ;;
         3)  
-            cd bin
+            cd bin || exit 1
             ./verify_constants.sh
             ;;
         4)
-            cd bin
+            cd bin || exit 1
             ./config_terminal.sh
             ;;
         9)

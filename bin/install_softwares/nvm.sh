@@ -49,6 +49,13 @@ install_nvm() {
         log_message "INFO" "Latest nvm version from GitHub API: $NVM_VERSION"
     fi
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download and install nvm from GitHub"
+        log_message "INFO" "[DRY-RUN] Would configure nvm in shell profile"
+        log_message "INFO" "NVM $NVM_VERSION successfully installed and configured. Restart shell or run 'source ~/.bashrc' to use nvm"
+        return
+    fi
+
     verify_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash"
     
     if [ $? -ne 0 ]; then

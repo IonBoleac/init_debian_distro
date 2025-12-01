@@ -6,6 +6,12 @@ intall_SQLite_CLI() {
     # Verify if SQLite is already installed
     is_installed "sqlite3" && return
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would install sqlite3 package"
+        log_message "INFO" "SQLite CLI successfully installed"
+        return
+    fi
+
     # Install SQLite
     verify_command "sudo apt-get install sqlite3 -y"
 

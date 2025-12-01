@@ -8,6 +8,14 @@ install_NodeJS() {
     # Verify if Node.js is already installed
     is_installed "node" && return
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download Node.js setup script"
+        log_message "INFO" "[DRY-RUN] Would install nodejs package"
+        log_message "INFO" "Node.js successfully installed"
+        log_message "INFO" "[DRY-RUN] Would update npm to latest version"
+        return
+    fi
+
     # Download and install Node.js
     verify_command "curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | sudo -E bash -"
 
@@ -26,7 +34,6 @@ install_NodeJS() {
     fi
 
     log_message "INFO" "Node.js successfully installed with the version $(node -v)"
-
     npm install -g npm@latest
     log_message "INFO" "Npm successfully updated with the version $(npm -v)"
 }

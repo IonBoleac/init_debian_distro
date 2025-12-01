@@ -33,6 +33,8 @@ declare -A FLAGS_DECLARATION=(
     ["-ax"]="all-excluding"
     ["--install"]="install"
     ["-i"]="install"
+    ["--dry-run"]="dry-run"
+    ["-d"]="dry-run"
     ["--help"]="help"
     ["-h"]="help"
 )

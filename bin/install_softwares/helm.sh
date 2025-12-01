@@ -6,6 +6,15 @@ install_helm() {
     # Verify if Helm is already installed
     is_installed "helm" && return
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download Helm installation script"
+        log_message "INFO" "[DRY-RUN] Would make get_helm.sh executable"
+        log_message "INFO" "[DRY-RUN] Would execute ./get_helm.sh"
+        log_message "INFO" "[DRY-RUN] Would verify Helm installation"
+        log_message "INFO" "Helm successfully installed"
+        return
+    fi
+
     # Download Helm installation script
     verify_command "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o get_helm.sh"
 

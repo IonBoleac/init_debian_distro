@@ -39,6 +39,14 @@ install_kind(){
         log_message "INFO" "Latest kind version from GitHub API: $KIND_VERSION"
     fi
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download kind binary for $(uname -m) architecture"
+        log_message "INFO" "[DRY-RUN] Would set executable permissions on kind binary"
+        log_message "INFO" "[DRY-RUN] Would move kind to /usr/local/bin/kind"
+        log_message "INFO" "kind successfully installed"
+        return
+    fi
+
     # For AMD64 / x86_64
     if [ "$(uname -m)" = x86_64 ]; then
         curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64

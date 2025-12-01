@@ -35,6 +35,14 @@ install_kubectl() {
         return
     fi
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would verify kubectl checksum"
+        log_message "INFO" "[DRY-RUN] Would install kubectl to /usr/local/bin/kubectl"
+        log_message "INFO" "[DRY-RUN] Would add kubectl completion to shell configuration"
+        log_message "INFO" "kubectl successfully installed and .kube directory created"
+        return
+    fi
+    
     if echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check | grep -q "kubectl: OK"; then
         log_message "INFO" "Checksum verification passed"
         
@@ -54,6 +62,7 @@ install_kubectl() {
             echo 'source <(kubectl completion bash)' >> ~/.bashrc
             log_message "INFO" "Bash kubectl completion added to ~/.bashrc"
         fi
+        
         # Create .kube directory
         mkdir -p ~/.kube
 

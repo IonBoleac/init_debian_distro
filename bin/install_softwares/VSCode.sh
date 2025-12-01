@@ -6,6 +6,13 @@ install_VSCode() {
     # Verify if VSCode is already installed
     is_installed "code" && return
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download VSCode .deb package"
+        log_message "INFO" "[DRY-RUN] Would install VSCode via dpkg"
+        log_message "INFO" "VSCode successfully installed"
+        return
+    fi
+
     # Download and install VSCode
     verify_command "wget https://go.microsoft.com/fwlink/?LinkID=760868 -O vscode.deb"
 

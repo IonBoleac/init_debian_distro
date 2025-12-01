@@ -49,7 +49,12 @@ install_Eduroam() {
         return
     fi
 
-    # print
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would execute Eduroam script with provided credentials"
+        log_message "INFO" "Eduroam successfully configured"
+        return
+    fi
+
     # Execute the Eduroam script
     if python3 $script_path -u "$EDUROAM_USERNAME" -p "$EDUROAM_PASSWORD"; then
         log_message "INFO" "Eduroam successfully configured"

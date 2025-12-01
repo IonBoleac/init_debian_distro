@@ -50,6 +50,15 @@ install_GO() {
     log_message "INFO" "Installing GO version $GO_VERSION from tar file"
     log_message "INFO" "Installing it in local directory: $GO_DIRECTORY"
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would download GO from $GO_URL"
+        log_message "INFO" "[DRY-RUN] Would extract GO archive"
+        log_message "INFO" "[DRY-RUN] Would copy GO to $GO_DIRECTORY"
+        log_message "INFO" "[DRY-RUN] Would add GO to PATH in ~/.bashrc"
+        log_message "INFO" "GO successfully installed. Restart shell or run 'source ~/.bashrc' to use go"
+        return
+    fi
+
     verify_command "wget $GO_URL"
 
     if [ $? -ne 0 ]; then

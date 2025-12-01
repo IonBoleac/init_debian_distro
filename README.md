@@ -53,6 +53,7 @@ The script is designed for Ubuntu-based distributions.
 
 Options:
   -a, --all                                # Install all software tools without prompts
+  -d, --dry-run                            # Preview actions without installing (dry-run mode)
   -i, --install [software...]              # Specify software to install (use one or more names)
   -ax, --all-excluding [software...]       # Install all except specified software
   -h, --help                               # Show this help message
@@ -78,6 +79,32 @@ Software options for --install and --all-excluding:
 Example usage:
   ./install_softwares.sh -ax Brave Docker  # Install all except Brave and Docker
   ./install_softwares.sh -i Brave Docker   # Install only Brave and Docker
+  ./install_softwares.sh -d -i VSCode Docker # Preview installation of VSCode and Docker without installing
+  ./install_softwares.sh --dry-run -a      # Preview all installations without executing
+```
+
+### Dry-Run Mode
+The dry-run mode (`--dry-run` or `-d`) allows you to preview all the operations that would be performed without actually executing them. This is particularly useful for:
+
+- **Previewing installations**: See what software would be installed and what commands would be executed
+- **Verifying dependencies**: Check which packages and system commands would be invoked
+- **Testing configurations**: Ensure your command flags are correct before running actual installations
+- **Educational purposes**: Understand the installation process for each software
+
+When dry-run mode is active, the script will:
+- Display all commands that would be executed with `[DRY-RUN]` prefix
+- Show package installations, system updates, and configuration changes
+- Skip all actual system modifications (no `apt-get install`, no downloads, no file changes)
+- Provide a summary at the end with `DRY-RUN MODE COMPLETED`
+
+Example output:
+```
+2025-12-01 11:46:57: INFO - ========== DRY-RUN MODE: No actual installations will be performed ==========
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would update system packages (apt-get update)
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would install specified software: Brave
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would check if brave-browser is installed
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would execute: sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg ...
+2025-12-01 11:47:00: INFO - ========== DRY-RUN MODE COMPLETED: Review actions above ==========
 ```
 
 ## License

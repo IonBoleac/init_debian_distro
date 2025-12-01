@@ -104,10 +104,10 @@ Each item is a complete and testable work unit.
 
 ## 📥📤 Phase 8: Input/Output Improvements
 
-- [ ] **Fix flag parsing in run_app.sh**  
+- [X] **Fix flag parsing in run_app.sh** ✅  
       → Handle multiple arguments correctly (lines 60-66)
 
-- [ ] **Add dry-run mode**  
+- [X] **Add dry-run mode** ✅  
       → Flag `--dry-run` for preview without installing
 
 - [ ] **Implement verbose mode**  

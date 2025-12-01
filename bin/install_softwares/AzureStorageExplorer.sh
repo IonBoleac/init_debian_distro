@@ -6,6 +6,15 @@ install_AzureStorageExplorer() {
     # Verify if Azure Storage Explorer is already installed
     is_installed "storage-explorer" && return
 
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log_message "INFO" "[DRY-RUN] Would install Azure Storage Explorer via snap"
+        log_message "INFO" "[DRY-RUN] Would connect to password-manager-service interface"
+        log_message "INFO" "[DRY-RUN] Would create ~/.snap-connect.sh script"
+        log_message "INFO" "[DRY-RUN] Would configure autostart for snap-connect"
+        log_message "INFO" "Azure Storage Explorer successfully installed"
+        return
+    fi
+
     verify_command "sudo snap install storage-explorer"
 
     if [ $? -ne 0 ]; then
