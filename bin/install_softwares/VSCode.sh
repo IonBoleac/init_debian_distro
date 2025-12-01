@@ -30,6 +30,5 @@ install_VSCode() {
     # Clean up downloaded file
     rm -f vscode.deb
 
-    echo "VSCode installed"
     log_message "INFO" "VSCode successfully installed"
 }

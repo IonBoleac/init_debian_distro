@@ -6,7 +6,6 @@ verify_env() {
         source ./config/.env
         log_message "INFO" "./config/.env file exists and successfully loaded"
     else
-        echo ".env file does not exist"
         log_message "ERROR" "./config/.env file does not exist"
         return 1
     fi

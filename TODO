@@ -58,7 +58,7 @@ Ogni punto è un'unità di lavoro completa e testabile.
 - [x] **Migliorare messaggi di errore** ✅  
       → Rendere messaggi actionable con suggerimenti risoluzione
 
-- [ ] **Aggiungere logging consistente**  
+- [x] **Aggiungere logging consistente** ✅  
       → Tutti gli script devono usare `log_message` uniformemente
 
 ---
