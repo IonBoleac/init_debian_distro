@@ -16,10 +16,24 @@ install_nvm() {
     # fi
 
     verify_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
+    
+    if [ $? -ne 0 ]; then
+        log_message "ERROR" "Failed to download/install nvm. Check internet connection or install manually from https://github.com/nvm-sh/nvm"
+        FAILED_INSTALLATIONS+=("nvm")
+        return
+    fi
+
+    # Configure nvm in shell profile
     echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
     echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc
     echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
-    source ~/.bashrc
-    log_message "INFO" "NVM successfully installed and configured"
-    verify_command "nvm -v"
+    
+    # Verify installation
+    if [ -d "$HOME/.nvm" ]; then
+        log_message "INFO" "NVM successfully installed and configured. Restart shell or run 'source ~/.bashrc' to use nvm"
+    else
+        log_message "ERROR" "NVM installation failed - directory not created"
+        FAILED_INSTALLATIONS+=("nvm")
+        return
+    fi
 }

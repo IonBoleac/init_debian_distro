@@ -11,7 +11,7 @@ install_GO() {
     log_message "INFO" "Installing it in local directory: $GO_DIRECTORY"
 
     # Verify if GO already exists
-    if find "$GO_DIRECTORY" -type d -print -quit; then
+    if [ -d "$GO_DIRECTORY" ]; then
         log_message "INFO" "GO directory already exists with version: $GO_VERSION."
         return
     fi
@@ -26,15 +26,36 @@ install_GO() {
     fi
 
     tar -xzf $GO_TAR_FILE
+    
+    if [ $? -ne 0 ]; then
+        log_message "ERROR" "Failed to extract GO archive"
+        FAILED_INSTALLATIONS+=("GO")
+        rm -f "$GO_TAR_FILE"
+        return
+    fi
+
     cp -r go ~/
     
+    if [ $? -ne 0 ]; then
+        log_message "ERROR" "Failed to copy GO to home directory"
+        FAILED_INSTALLATIONS+=("GO")
+        rm -rf go "$GO_TAR_FILE"
+        return
+    fi
+    
     # Clean up downloaded and extracted files
-    rm -rf go $GO_TAR_FILE
+    rm -rf go "$GO_TAR_FILE"
 
     # Add GO to PATH in .bashrc
     echo "export GOPATH=$GO_DIRECTORY" >> ~/.bashrc
     echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bashrc
 
-    # reload .bashrc
-    source ~/.bashrc
+    # Verify installation
+    if [ -d "$GO_DIRECTORY" ]; then
+        log_message "INFO" "GO successfully installed. Restart shell or run 'source ~/.bashrc' to use go"
+    else
+        log_message "ERROR" "GO installation failed - directory not created"
+        FAILED_INSTALLATIONS+=("GO")
+        return
+    fi
 }
