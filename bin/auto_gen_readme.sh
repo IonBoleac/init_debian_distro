@@ -79,6 +79,30 @@ After that follow the bellow commands to know how to use the install software sc
     markdown_content+="\`\`\`bash\n$help_output\n\`\`\`\n"
 
 markdown_content+="
+### Dry-Run Mode
+The dry-run mode (\`--dry-run\` or \`-d\`) allows you to preview all the operations that would be performed without actually executing them. This is particularly useful for:
+
+- **Previewing installations**: See what software would be installed and what commands would be executed
+- **Verifying dependencies**: Check which packages and system commands would be invoked
+- **Testing configurations**: Ensure your command flags are correct before running actual installations
+- **Educational purposes**: Understand the installation process for each software
+
+When dry-run mode is active, the script will:
+- Display all commands that would be executed with \`[DRY-RUN]\` prefix
+- Show package installations, system updates, and configuration changes
+- Skip all actual system modifications (no \`apt-get install\`, no downloads, no file changes)
+- Provide a summary at the end with \`DRY-RUN MODE COMPLETED\`
+
+Example output:
+\`\`\`
+2025-12-01 11:46:57: INFO - ========== DRY-RUN MODE: No actual installations will be performed ==========
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would update system packages (apt-get update)
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would install specified software: Brave
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would check if brave-browser is installed
+2025-12-01 11:46:57: INFO - [DRY-RUN] Would execute: sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg ...
+2025-12-01 11:47:00: INFO - ========== DRY-RUN MODE COMPLETED: Review actions above ==========
+\`\`\`
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
