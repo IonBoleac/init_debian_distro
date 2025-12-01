@@ -81,10 +81,10 @@ Each item is a complete and testable work unit.
 - [ ] **Centralize software versions**  
       → Note necessary Move hardcoded versions (GO, kind) to `constants.sh`
 
-- [ ] **Support automatic latest release**  
+- [x] **Support automatic latest release** ✅  
       → Use GitHub API/curl to get latest available version
 
-- [ ] **Create .env.example file**  
+- [ ] **Create .env.example file**   
       → Template for user configurations (currently only Eduroam commented)
 
 ---

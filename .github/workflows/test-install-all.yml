@@ -51,14 +51,14 @@ jobs:
       - name: Verify installed versions
         run: |
           echo "=== Installed Versions ==="
-          kubectl version --client --short 2>/dev/null || echo "kubectl: N/A"
-          code --version 2>/dev/null | head -1 || echo "VSCode: N/A"
-          docker --version 2>/dev/null || echo "Docker: N/A"
-          kind version 2>/dev/null || echo "kind: N/A"
-          kustomize version --short 2>/dev/null || echo "kustomize: N/A"
-          sqlite3 --version 2>/dev/null || echo "SQLite CLI: N/A"
-          node --version 2>/dev/null || echo "Node.js: N/A"
-          npm --version 2>/dev/null || echo "npm: N/A"
+          echo "kubectl: $(kubectl version --client --short 2>/dev/null)" || echo "kubectl: N/A"
+          echo "VSCode: $(code --version 2>/dev/null | head -1)" || echo "VSCode: N/A"
+          echo "Docker: $(docker --version 2>/dev/null)" || echo "Docker: N/A"
+          echo "kind: $(kind version 2>/dev/null)" || echo "kind: N/A"
+          echo "kustomize: $(kustomize version --short 2>/dev/null)" || echo "kustomize: N/A"
+          echo "SQLite CLI: $(sqlite3 --version 2>/dev/null)" || echo "SQLite CLI: N/A"
+          echo "Node.js: $(node --version 2>/dev/null)" || echo "Node.js: N/A"
+          echo "npm: $(npm --version 2>/dev/null)" || echo "npm: N/A"
 
       # - name: Check logs for errors
       #   if: always()
