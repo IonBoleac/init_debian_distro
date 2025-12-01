@@ -11,7 +11,7 @@ declare -a FAILED_INSTALLATIONS
 
 # Funtion to verify if the command are gone or not
 verify_command() {
-    "$@" > /dev/null 2>> "$LOG_FILE"
+    eval "$@" > /dev/null 2>> "$LOG_FILE"
     local status=$?
 
     if [ $status -ne 0 ]; then

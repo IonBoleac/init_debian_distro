@@ -1,61 +1,180 @@
-Piano: Miglioramento Incrementale init_debian_distro
-Procedura di miglioramento suddivisa in fasi incrementali e indipendenti. Ogni punto è un'unità di lavoro completa e testabile.
+# 📋 Piano di Miglioramento: init_debian_distro
 
-Fase 1: Correzioni Critiche (Funzionalità Bloccanti)
-Creare script Helm mancante - Implementare bin/install_softwares/Helm.sh seguendo pattern degli altri installer
-Correggere typo SQLite CLI - In SQLite_CLI.sh e constants.sh: intall_SQLite_CLI → install_SQLite_CLI
-Correggere nome funzione SQLite Browser - In browser_SQLite.sh e constants.sh: install_browser-SQLite → install_browser_SQLite
-Aggiungere controlli errore ai comandi cd - In run_app.sh righe 64, 69, 75, 79 e bin/terminal_config/font.sh:6
-Correggere passaggio argomenti main - In bin/install_softwares.sh:325: main $* → main "$@"
-Fase 2: Gestione Variabili e Export
-DONE | Esportare variabili in constants.sh - Aggiungere export a tutte le variabili usate da altri script
-DONE | Esportare USER_SHELL - In install_softwares.sh per renderla disponibile a kubectl.sh
-DONE | Rimuovere eval da verify_command - Sostituire con esecuzione diretta più sicura in bin/install_softwares.sh:14
-Fase 3: Pulizia Codice Legacy
-DONE | Archiviare install_softwares_old.sh - Spostare in cartella archive/ o rinominare con suffisso .deprecated
-Rimuovere codice commentato - Pulire blocchi commentati senza spiegazione in tutti gli script
-Fase 4: Miglioramenti Error Handling
-DONE | Uniformare cleanup file temporanei - Garantire che tutti gli script rimuovano file scaricati
-Aggiungere rollback su fallimento - Cleanup automatico quando installazione fallisce a metà
-DONE | Migliorare messaggi di errore - Rendere messaggi actionable con suggerimenti risoluzione
-Aggiungere logging consistente - Tutti gli script devono usare log_message uniformemente
-Fase 5: Sicurezza
-Sostituire curl pipe sudo - In NodeJS.sh:10 usare download e verifica prima di esecuzione
-Aggiungere verifica checksum - Per download binari in VSCode.sh, k9s.sh, kubectl.sh
-Validare GPG signatures - Dove disponibili per pacchetti scaricati
-Fase 5: Sicurezza
-Sostituire curl pipe sudo - In NodeJS.sh:10 usare download e verifica prima di esecuzione
-Aggiungere verifica checksum - Per download binari in VSCode.sh, k9s.sh, kubectl.sh
-Validare GPG signatures - Dove disponibili per pacchetti scaricati
-Fase 6: Versioning e Configurazione
-Centralizzare versioni software - Spostare versioni hardcoded (GO, kind) in constants.sh
-Supportare latest release automatico - Usare API GitHub/curl per ottenere ultima versione disponibile
-Creare file .env.example - Template per configurazioni utente (al momento solo Eduroam commentato)
-Fase 7: Fixing ShellCheck Warnings
-Quotare tutte le variabili - Risolvere warning "variable not quoted" in tutti gli script
-Separare declare e assign - Pattern local var=$(cmd) maschera exit code
-Gestire source con path variabili - In go.sh:37, nvm.sh:22 per ~/.bashrc
-Fase 8: Miglioramenti Input/Output
-Fixare parsing flags in run_app.sh - Gestire correttamente argomenti multipli (righe 60-66)
-Aggiungere modalità dry-run - Flag --dry-run per preview senza installare
-Implementare modalità verbose - Flag -v/--verbose per debug dettagliato
-Aggiungere barra progresso - Abilitare codice progress bar commentato (se utile)
-Fase 9: Funzionalità Nuove
-Implementare comando uninstall - Rimozione software installati dal tool
-Implementare comando update - Aggiornamento software già installati
-Aggiungere pre-flight checks - Verificare prerequisiti (sudo, internet, spazio disco) prima esecuzione
-Implementare state tracking - File JSON che traccia cosa installato e quando
-Fase 10: Documentazione
-Espandere README - Aggiungere sezioni: prerequisiti, troubleshooting, come contribuire
-Aggiungere header comments - Documentare scopo e uso di ogni script
-Creare CONTRIBUTING.md - Guida per aggiungere nuovi software
-Aggiornare TODO - Tracciare technical debt e feature pianificate
-Fase 11: Testing e Validazione
-Aggiungere test sintassi - Script che esegue shellcheck su tutti i file
-Aggiungere test installazione - Script che verifica is_installed post-install
-Test compatibilità distro - Validare su Debian/Ubuntu versioni diverse
-Considerazioni
-Priorità consigliata: Fase 1 → Fase 2 → Fase 3 → resto a scelta
-Ogni punto è indipendente: Possibile saltare o riordinare fasi successive
-Testing: Dopo ogni modifica testare funzionamento base
-Backup: Consigliato commit git prima di ogni modifica
+Procedura di miglioramento suddivisa in **fasi incrementali e indipendenti**.  
+Ogni punto è un'unità di lavoro completa e testabile.
+
+---
+
+## 🔴 Fase 1: Correzioni Critiche (Funzionalità Bloccanti)
+
+- [ ] **Creare script Helm mancante**  
+      → Implementare `bin/install_softwares/Helm.sh` seguendo pattern degli altri installer
+
+- [ ] **Correggere typo SQLite CLI**  
+      → In `SQLite_CLI.sh` e `constants.sh`: `intall_SQLite_CLI` → `install_SQLite_CLI`
+
+- [ ] **Correggere nome funzione SQLite Browser**  
+      → In `browser_SQLite.sh` e `constants.sh`: `install_browser-SQLite` → `install_browser_SQLite`
+
+- [ ] **Aggiungere controlli errore ai comandi cd**  
+      → In `run_app.sh` righe 64, 69, 75, 79 e `bin/terminal_config/font.sh:6`
+
+- [ ] **Correggere passaggio argomenti main**  
+      → In `bin/install_softwares.sh:325`: `main $*` → `main "$@"`
+
+---
+
+## 🟢 Fase 2: Gestione Variabili e Export
+
+- [x] **Esportare variabili in constants.sh** ✅  
+      → Aggiungere `export` a tutte le variabili usate da altri script
+
+- [x] **Esportare USER_SHELL** ✅  
+      → In `install_softwares.sh` per renderla disponibile a `kubectl.sh`
+
+- [x] **Rimuovere eval da verify_command** ✅  
+      → Sostituire con esecuzione diretta più sicura in `bin/install_softwares.sh:14`
+
+---
+
+## 🧹 Fase 3: Pulizia Codice Legacy
+
+- [x] **Archiviare install_softwares_old.sh** ✅  
+      → Spostato in cartella `archive/`
+
+- [ ] **Rimuovere codice commentato**  
+      → Pulire blocchi commentati senza spiegazione in tutti gli script
+
+---
+
+## 🛡️ Fase 4: Miglioramenti Error Handling
+
+- [x] **Uniformare cleanup file temporanei** ✅  
+      → Garantire che tutti gli script rimuovano file scaricati
+
+- [ ] **Aggiungere rollback su fallimento**  
+      → Cleanup automatico quando installazione fallisce a metà
+
+- [x] **Migliorare messaggi di errore** ✅  
+      → Rendere messaggi actionable con suggerimenti risoluzione
+
+- [ ] **Aggiungere logging consistente**  
+      → Tutti gli script devono usare `log_message` uniformemente
+
+---
+
+## 🔒 Fase 5: Sicurezza
+
+- [ ] **Sostituire curl pipe sudo**  
+      → In `NodeJS.sh:10` usare download e verifica prima di esecuzione
+
+- [ ] **Aggiungere verifica checksum**  
+      → Per download binari in `VSCode.sh`, `k9s.sh`, `kubectl.sh`
+
+- [ ] **Validare GPG signatures**  
+      → Dove disponibili per pacchetti scaricati
+
+---
+
+## ⚙️ Fase 6: Versioning e Configurazione
+
+- [ ] **Centralizzare versioni software**  
+      → Spostare versioni hardcoded (GO, kind) in `constants.sh`
+
+- [ ] **Supportare latest release automatico**  
+      → Usare API GitHub/curl per ottenere ultima versione disponibile
+
+- [ ] **Creare file .env.example**  
+      → Template per configurazioni utente (al momento solo Eduroam commentato)
+
+---
+
+## 🔧 Fase 7: Fixing ShellCheck Warnings
+
+- [ ] **Quotare tutte le variabili**  
+      → Risolvere warning "variable not quoted" in tutti gli script
+
+- [ ] **Separare declare e assign**  
+      → Pattern `local var=$(cmd)` maschera exit code
+
+- [ ] **Gestire source con path variabili**  
+      → In `go.sh:37`, `nvm.sh:22` per `~/.bashrc`
+
+---
+
+## 📥📤 Fase 8: Miglioramenti Input/Output
+
+- [ ] **Fixare parsing flags in run_app.sh**  
+      → Gestire correttamente argomenti multipli (righe 60-66)
+
+- [ ] **Aggiungere modalità dry-run**  
+      → Flag `--dry-run` per preview senza installare
+
+- [ ] **Implementare modalità verbose**  
+      → Flag `-v/--verbose` per debug dettagliato
+
+- [ ] **Aggiungere barra progresso**  
+      → Abilitare codice progress bar commentato (se utile)
+
+---
+
+## ✨ Fase 9: Funzionalità Nuove
+
+- [ ] **Implementare comando uninstall**  
+      → Rimozione software installati dal tool
+
+- [ ] **Implementare comando update**  
+      → Aggiornamento software già installati
+
+- [ ] **Aggiungere pre-flight checks**  
+      → Verificare prerequisiti (sudo, internet, spazio disco) prima esecuzione
+
+- [ ] **Implementare state tracking**  
+      → File JSON che traccia cosa installato e quando
+
+---
+
+## 📚 Fase 10: Documentazione
+
+- [ ] **Espandere README**  
+      → Aggiungere sezioni: prerequisiti, troubleshooting, come contribuire
+
+- [ ] **Aggiungere header comments**  
+      → Documentare scopo e uso di ogni script
+
+- [ ] **Creare CONTRIBUTING.md**  
+      → Guida per aggiungere nuovi software
+
+- [ ] **Aggiornare TODO**  
+      → Tracciare technical debt e feature pianificate
+
+---
+
+## 🧪 Fase 11: Testing e Validazione
+
+- [ ] **Aggiungere test sintassi**  
+      → Script che esegue shellcheck su tutti i file
+
+- [ ] **Aggiungere test installazione**  
+      → Script che verifica `is_installed` post-install
+
+- [ ] **Test compatibilità distro**  
+      → Validare su Debian/Ubuntu versioni diverse
+
+---
+
+## 📝 Considerazioni
+
+**Priorità consigliata:**  
+`Fase 1` → `Fase 2` → `Fase 3` → resto a scelta
+
+**Regole generali:**
+- ✅ Ogni punto è **indipendente** (possibile saltare o riordinare fasi successive)
+- 🧪 **Testing**: Dopo ogni modifica testare funzionamento base
+- 💾 **Backup**: Consigliato commit git prima di ogni modifica
+
+---
+
+**Legenda:**
+- [ ] Todo
+- [x] Completato ✅
