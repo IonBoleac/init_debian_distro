@@ -51,14 +51,14 @@ jobs:
       - name: Verify installed versions
         run: |
           echo "=== Installed Versions ==="
-          echo -n "kubectl: " && kubectl version --client --short 2>/dev/null || echo "kubectl: N/A"
-          echo -n "VSCode: " && code --version 2>/dev/null | head -1 || echo "VSCode: N/A"
-          echo -n "Docker: " && docker --version 2>/dev/null || echo "Docker: N/A"
-          echo -n "kind: " && kind version 2>/dev/null || echo "kind: N/A"
-          echo -n "kustomize: " && kustomize version --short 2>/dev/null || echo "kustomize: N/A"
-          echo -n "SQLite CLI: " && sqlite3 --version 2>/dev/null || echo "SQLite CLI: N/A"
-          echo -n "Node.js: " && node --version 2>/dev/null || echo "Node.js: N/A"
-          echo -n "npm: " && npm --version 2>/dev/null || echo "npm: N/A"
+          printf "kubectl: " && (kubectl version --client 2>/dev/null | head -1 || echo "N/A")
+          printf "VSCode: " && (code --version 2>/dev/null | head -1 || echo "N/A")
+          printf "Docker: " && (docker --version 2>/dev/null || echo "N/A")
+          printf "kind: " && (kind version 2>/dev/null || echo "N/A")
+          printf "kustomize: " && (kustomize version --short 2>/dev/null || echo "N/A")
+          printf "SQLite CLI: " && (sqlite3 --version 2>/dev/null || echo "N/A")
+          printf "Node.js: " && (node --version 2>/dev/null || echo "N/A")
+          printf "npm: " && (npm --version 2>/dev/null || echo "N/A")
 
       # - name: Check logs for errors
       #   if: always()
