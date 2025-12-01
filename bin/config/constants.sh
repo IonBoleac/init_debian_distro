@@ -17,7 +17,7 @@ declare -A SOFTWARE_DETAILS=(
     ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;https://microk8s.io/"
     ["GO"]="install_GO;tar;Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file;https://golang.org/"
     ["kind"]="install_kind;curl;Tool for running local Kubernetes clusters using Docker container nodes.;https://kind.sigs.k8s.io/"
-    ["Helm"]="install_Helm;curl;Package manager for Kubernetes.;https://helm.sh/"
+    ["Helm"]="install_helm;curl;Package manager for Kubernetes.;https://helm.sh/"
     ["nvm"]="install_nvm;curl;Node Version Manager - manages multiple Node.js versions.;https://github.com/nvm-sh/nvm#installing-and-updating"
     ["k9s"]="install_k9s;wget;Kubernetes CLI to manage and observe your clusters in style.;https://github.com/derailed/k9s"
 

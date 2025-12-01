@@ -32,17 +32,10 @@ jobs:
         run: |
           cd bin
           # Export PATH to ensure commands are available
-          export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-          # Exclude problematic software for CI:
-          # - Snap-based: Microk8s, AzureStorageExplorer (snap doesn't work well in GH Actions)
-          # - Heavy downloads: GO, nvm, k9s
-          # - Requires user config: Spotify, Brave (need GPG keys setup)
-          # - Browser: SQLite Browser (GUI app)
-          # - Helm: Will test separately
-          ./install_softwares.sh -ax Spotify # Microk8s AzureStorageExplorer GO nvm k9s Brave "SQLite Browser" Helm
+          ./install_softwares.sh -ax Spotify 
         env:
           CI: true
-          PATH: /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
+          # PATH: /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
 
       - name: Verify installations
         run: |
@@ -55,10 +48,10 @@ jobs:
           command -v sqlite3 && echo "✅ SQLite CLI installed" || echo "❌ SQLite CLI not found"
           command -v node && echo "✅ Node.js installed" || echo "❌ Node.js not found"
 
-      - name: Check logs for errors
-        if: always()
-        run: |
-          if [ -f bin/logs.log ]; then
-            echo "=== Installation Logs ==="
-            cat bin/logs.log
-          fi
+      # - name: Check logs for errors
+      #   if: always()
+      #   run: |
+      #     if [ -f bin/logs.log ]; then
+      #       echo "=== Installation Logs ==="
+      #       cat bin/logs.log
+      #     fi

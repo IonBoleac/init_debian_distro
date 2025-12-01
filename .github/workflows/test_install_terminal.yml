@@ -16,12 +16,78 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run installation script with all software
+      - name: Run terminal configuration script
         run: |
           cd bin 
           export AUTOMATIC_STARTUP=true
           chmod +x config_terminal.sh
           ./config_terminal.sh true
-          zsh
-          echo "Terminal configuration script executed successfully."
-          p10k help
+
+      - name: Verify installations
+        run: |
+          echo "=== Verifying terminal configuration ==="
+          
+          # Check if zsh is installed
+          if command -v zsh &> /dev/null; then
+            echo "✅ Zsh installed: $(zsh --version)"
+          else
+            echo "❌ Zsh not found"
+            exit 1
+          fi
+          
+          # Check if Oh My Zsh is installed
+          if [ -d "$HOME/.oh-my-zsh" ]; then
+            echo "✅ Oh My Zsh installed"
+          else
+            echo "❌ Oh My Zsh not found"
+            exit 1
+          fi
+          
+          # Check if Powerlevel10k theme is installed
+          if [ -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
+            echo "✅ Powerlevel10k theme installed"
+          else
+            echo "❌ Powerlevel10k theme not found"
+            exit 1
+          fi
+          
+          # Check if plugins are installed
+          if [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
+            echo "✅ zsh-syntax-highlighting plugin installed"
+          else
+            echo "❌ zsh-syntax-highlighting not found"
+          fi
+          
+          if [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
+            echo "✅ zsh-autosuggestions plugin installed"
+          else
+            echo "❌ zsh-autosuggestions not found"
+          fi
+          
+          # Check if .zshrc exists
+          if [ -f "$HOME/.zshrc" ]; then
+            echo "✅ .zshrc configured"
+            echo "--- Checking .zshrc content ---"
+            grep -q "powerlevel10k" "$HOME/.zshrc" && echo "  ✓ Powerlevel10k configured in .zshrc" || echo "  ✗ Powerlevel10k not configured"
+            grep -q "zsh-syntax-highlighting" "$HOME/.zshrc" && echo "  ✓ Syntax highlighting configured" || echo "  ✗ Syntax highlighting not configured"
+            grep -q "zsh-autosuggestions" "$HOME/.zshrc" && echo "  ✓ Autosuggestions configured" || echo "  ✗ Autosuggestions not configured"
+          else
+            echo "❌ .zshrc not found"
+            exit 1
+          fi
+          
+          # Check if fonts are installed
+          if fc-list | grep -q "MesloLGS NF"; then
+            echo "✅ MesloLGS NF fonts installed"
+            fc-list | grep "MesloLGS NF" | head -n 4
+          else
+            echo "⚠️  MesloLGS NF fonts not found (expected in CI)"
+          fi
+          
+          # Check eza, bat, most
+          command -v eza &> /dev/null && echo "✅ eza installed" || echo "❌ eza not found"
+          command -v bat &> /dev/null && echo "✅ bat installed" || echo "❌ bat not found"
+          command -v most &> /dev/null && echo "✅ most installed" || echo "❌ most not found"
+          
+          echo ""
+          echo "=== Terminal configuration test completed ==="
