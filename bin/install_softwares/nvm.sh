@@ -2,6 +2,8 @@
 # script to installa nvm
 
 install_nvm() {
+    local NVM_VERSION="v0.40.3"
+    
     log_message "INFO" "Installing nvm in progress..."
     # Verify if nvm is already installed
     is_installed "nvm" && return
@@ -9,13 +11,13 @@ install_nvm() {
     #     log_message "INFO" "nvm is already installed."
     #     read -p "Do you want to reinstall with the newest nvm? (y/n): " choice
     #     case "$choice" in
-    #         y|Y ) log_message "INFO" "Reinstalling nvm...";;
+    #         y|Y ) log_message "INFO" "Reinstalling nvm...";;      
     #         n|N ) log_message "INFO" "Skipping nvm installation."; return;;
     #         * ) log_message "INFO" "Invalid choice. Skipping nvm installation."; return;;
     #     esac
     # fi
 
-    verify_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
+    verify_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash"
     
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download/install nvm. Check internet connection or install manually from https://github.com/nvm-sh/nvm"

@@ -1,16 +1,18 @@
 #!/bin/bash
 
 install_kind(){
+    local KIND_VERSION="v0.27.0"
+    
     log_message "INFO" "Installing kind in progress..."
     # Verify if kind is already installed
     is_installed "kind" && return
 
     # For AMD64 / x86_64
     if [ "$(uname -m)" = x86_64 ]; then
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64
     # For ARM64
     elif [ "$(uname -m)" = aarch64 ]; then
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-arm64
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-arm64
     else
         log_message "ERROR" "Unsupported architecture: $(uname -m)"
         FAILED_INSTALLATIONS+=("kind")

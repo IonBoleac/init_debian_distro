@@ -1,180 +1,180 @@
-# 📋 Piano di Miglioramento: init_debian_distro
+# 📋 Improvement Plan: init_debian_distro
 
-Procedura di miglioramento suddivisa in **fasi incrementali e indipendenti**.  
-Ogni punto è un'unità di lavoro completa e testabile.
+Improvement procedure divided into **incremental and independent phases**.  
+Each item is a complete and testable work unit.
 
 ---
 
-## 🔴 Fase 1: Correzioni Critiche (Funzionalità Bloccanti)
+## 🔴 Phase 1: Critical Fixes (Blocking Features)
 
-- [ ] **Creare script Helm mancante**  
-      → Implementare `bin/install_softwares/Helm.sh` seguendo pattern degli altri installer
+- [ ] **Create missing Helm script**  
+      → Implement `bin/install_softwares/Helm.sh` following other installer patterns
 
-- [ ] **Correggere typo SQLite CLI**  
-      → In `SQLite_CLI.sh` e `constants.sh`: `intall_SQLite_CLI` → `install_SQLite_CLI`
+- [ ] **Fix SQLite CLI typo**  
+      → In `SQLite_CLI.sh` and `constants.sh`: `intall_SQLite_CLI` → `install_SQLite_CLI`
 
-- [ ] **Correggere nome funzione SQLite Browser**  
-      → In `browser_SQLite.sh` e `constants.sh`: `install_browser-SQLite` → `install_browser_SQLite`
+- [ ] **Fix SQLite Browser function name**  
+      → In `browser_SQLite.sh` and `constants.sh`: `install_browser-SQLite` → `install_browser_SQLite`
 
-- [ ] **Aggiungere controlli errore ai comandi cd**  
-      → In `run_app.sh` righe 64, 69, 75, 79 e `bin/terminal_config/font.sh:6`
+- [ ] **Add error checks to cd commands**  
+      → In `run_app.sh` lines 64, 69, 75, 79 and `bin/terminal_config/font.sh:6`
 
-- [ ] **Correggere passaggio argomenti main**  
+- [ ] **Fix main argument passing**  
       → In `bin/install_softwares.sh:325`: `main $*` → `main "$@"`
 
 ---
 
-## 🟢 Fase 2: Gestione Variabili e Export
+## 🟢 Phase 2: Variable Management and Export
 
-- [x] **Esportare variabili in constants.sh** ✅  
-      → Aggiungere `export` a tutte le variabili usate da altri script
+- [x] **Export variables in constants.sh** ✅  
+      → Add `export` to all variables used by other scripts
 
-- [x] **Esportare USER_SHELL** ✅  
-      → In `install_softwares.sh` per renderla disponibile a `kubectl.sh`
+- [x] **Export USER_SHELL** ✅  
+      → In `install_softwares.sh` to make it available to `kubectl.sh`
 
-- [x] **Rimuovere eval da verify_command** ✅  
-      → Sostituire con esecuzione diretta più sicura in `bin/install_softwares.sh:14`
-
----
-
-## 🧹 Fase 3: Pulizia Codice Legacy
-
-- [x] **Archiviare install_softwares_old.sh** ✅  
-      → Spostato in cartella `archive/`
-
-- [ ] **Rimuovere codice commentato**  
-      → Pulire blocchi commentati senza spiegazione in tutti gli script
+- [x] **Remove eval from verify_command** ✅  
+      → Replace with safer direct execution in `bin/install_softwares.sh:14`
 
 ---
 
-## 🛡️ Fase 4: Miglioramenti Error Handling
+## 🧹 Phase 3: Legacy Code Cleanup
 
-- [x] **Uniformare cleanup file temporanei** ✅  
-      → Garantire che tutti gli script rimuovano file scaricati
+- [x] **Archive install_softwares_old.sh** ✅  
+      → Moved to `archive/` folder
 
-- [ ] **Aggiungere rollback su fallimento**  
-      → Cleanup automatico quando installazione fallisce a metà
-
-- [x] **Migliorare messaggi di errore** ✅  
-      → Rendere messaggi actionable con suggerimenti risoluzione
-
-- [x] **Aggiungere logging consistente** ✅  
-      → Tutti gli script devono usare `log_message` uniformemente
+- [ ] **Remove commented code**  
+      → Clean commented blocks without explanation in all scripts
 
 ---
 
-## 🔒 Fase 5: Sicurezza
+## 🛡️ Phase 4: Error Handling Improvements
 
-- [ ] **Sostituire curl pipe sudo**  
-      → In `NodeJS.sh:10` usare download e verifica prima di esecuzione
+- [x] **Standardize temporary file cleanup** ✅  
+      → Ensure all scripts remove downloaded files
 
-- [ ] **Aggiungere verifica checksum**  
-      → Per download binari in `VSCode.sh`, `k9s.sh`, `kubectl.sh`
+- [ ] **Add rollback on failure**  
+      → Automatic cleanup when installation fails midway
 
-- [ ] **Validare GPG signatures**  
-      → Dove disponibili per pacchetti scaricati
+- [x] **Improve error messages** ✅  
+      → Make messages actionable with resolution suggestions
 
----
-
-## ⚙️ Fase 6: Versioning e Configurazione
-
-- [ ] **Centralizzare versioni software**  
-      → Spostare versioni hardcoded (GO, kind) in `constants.sh`
-
-- [ ] **Supportare latest release automatico**  
-      → Usare API GitHub/curl per ottenere ultima versione disponibile
-
-- [ ] **Creare file .env.example**  
-      → Template per configurazioni utente (al momento solo Eduroam commentato)
+- [x] **Add consistent logging** ✅  
+      → All scripts must use `log_message` uniformly
 
 ---
 
-## 🔧 Fase 7: Fixing ShellCheck Warnings
+## 🔒 Phase 5: Security
 
-- [ ] **Quotare tutte le variabili**  
-      → Risolvere warning "variable not quoted" in tutti gli script
+- [ ] **Replace curl pipe sudo**  
+      → In `NodeJS.sh:10` use download and verify before execution
 
-- [ ] **Separare declare e assign**  
-      → Pattern `local var=$(cmd)` maschera exit code
+- [ ] **Add checksum verification**  
+      → For binary downloads in `VSCode.sh`, `k9s.sh`, `kubectl.sh`
 
-- [ ] **Gestire source con path variabili**  
-      → In `go.sh:37`, `nvm.sh:22` per `~/.bashrc`
-
----
-
-## 📥📤 Fase 8: Miglioramenti Input/Output
-
-- [ ] **Fixare parsing flags in run_app.sh**  
-      → Gestire correttamente argomenti multipli (righe 60-66)
-
-- [ ] **Aggiungere modalità dry-run**  
-      → Flag `--dry-run` per preview senza installare
-
-- [ ] **Implementare modalità verbose**  
-      → Flag `-v/--verbose` per debug dettagliato
-
-- [ ] **Aggiungere barra progresso**  
-      → Abilitare codice progress bar commentato (se utile)
+- [ ] **Validate GPG signatures**  
+      → Where available for downloaded packages
 
 ---
 
-## ✨ Fase 9: Funzionalità Nuove
+## ⚙️ Phase 6: Versioning and Configuration
 
-- [ ] **Implementare comando uninstall**  
-      → Rimozione software installati dal tool
+- [ ] **Centralize software versions**  
+      → Note necessary Move hardcoded versions (GO, kind) to `constants.sh`
 
-- [ ] **Implementare comando update**  
-      → Aggiornamento software già installati
+- [ ] **Support automatic latest release**  
+      → Use GitHub API/curl to get latest available version
 
-- [ ] **Aggiungere pre-flight checks**  
-      → Verificare prerequisiti (sudo, internet, spazio disco) prima esecuzione
-
-- [ ] **Implementare state tracking**  
-      → File JSON che traccia cosa installato e quando
+- [ ] **Create .env.example file**  
+      → Template for user configurations (currently only Eduroam commented)
 
 ---
 
-## 📚 Fase 10: Documentazione
+## 🔧 Phase 7: Fixing ShellCheck Warnings
 
-- [ ] **Espandere README**  
-      → Aggiungere sezioni: prerequisiti, troubleshooting, come contribuire
+- [ ] **Quote all variables**  
+      → Fix "variable not quoted" warnings in all scripts
 
-- [ ] **Aggiungere header comments**  
-      → Documentare scopo e uso di ogni script
+- [ ] **Separate declare and assign**  
+      → Pattern `local var=$(cmd)` masks exit code
 
-- [ ] **Creare CONTRIBUTING.md**  
-      → Guida per aggiungere nuovi software
-
-- [ ] **Aggiornare TODO**  
-      → Tracciare technical debt e feature pianificate
+- [ ] **Handle source with variable paths**  
+      → In `go.sh:37`, `nvm.sh:22` for `~/.bashrc`
 
 ---
 
-## 🧪 Fase 11: Testing e Validazione
+## 📥📤 Phase 8: Input/Output Improvements
 
-- [ ] **Aggiungere test sintassi**  
-      → Script che esegue shellcheck su tutti i file
+- [ ] **Fix flag parsing in run_app.sh**  
+      → Handle multiple arguments correctly (lines 60-66)
 
-- [ ] **Aggiungere test installazione**  
-      → Script che verifica `is_installed` post-install
+- [ ] **Add dry-run mode**  
+      → Flag `--dry-run` for preview without installing
 
-- [ ] **Test compatibilità distro**  
-      → Validare su Debian/Ubuntu versioni diverse
+- [ ] **Implement verbose mode**  
+      → Flag `-v/--verbose` for detailed debug
 
----
-
-## 📝 Considerazioni
-
-**Priorità consigliata:**  
-`Fase 1` → `Fase 2` → `Fase 3` → resto a scelta
-
-**Regole generali:**
-- ✅ Ogni punto è **indipendente** (possibile saltare o riordinare fasi successive)
-- 🧪 **Testing**: Dopo ogni modifica testare funzionamento base
-- 💾 **Backup**: Consigliato commit git prima di ogni modifica
+- [ ] **Add progress bar**  
+      → Enable commented progress bar code (if useful)
 
 ---
 
-**Legenda:**
+## ✨ Phase 9: New Features
+
+- [ ] **Implement uninstall command**  
+      → Remove software installed by the tool
+
+- [ ] **Implement update command**  
+      → Update already installed software
+
+- [ ] **Add pre-flight checks**  
+      → Verify prerequisites (sudo, internet, disk space) before execution
+
+- [ ] **Implement state tracking**  
+      → JSON file that tracks what was installed and when
+
+---
+
+## 📚 Phase 10: Documentation
+
+- [ ] **Expand README**  
+      → Add sections: prerequisites, troubleshooting, how to contribute
+
+- [ ] **Add header comments**  
+      → Document purpose and usage of each script
+
+- [ ] **Create CONTRIBUTING.md**  
+      → Guide for adding new software
+
+- [ ] **Update TODO**  
+      → Track technical debt and planned features
+
+---
+
+## 🧪 Phase 11: Testing and Validation
+
+- [ ] **Add syntax tests**  
+      → Script that runs shellcheck on all files
+
+- [ ] **Add installation tests**  
+      → Script that verifies `is_installed` post-install
+
+- [ ] **Test distro compatibility**  
+      → Validate on different Debian/Ubuntu versions
+
+---
+
+## 📝 Considerations
+
+**Recommended priority:**  
+`Phase 1` → `Phase 2` → `Phase 3` → rest as desired
+
+**General rules:**
+- ✅ Each item is **independent** (possible to skip or reorder subsequent phases)
+- 🧪 **Testing**: After each modification test basic functionality
+- 💾 **Backup**: Recommended git commit before each modification
+
+---
+
+**Legend:**
 - [ ] Todo
-- [x] Completato ✅
+- [x] Completed ✅
