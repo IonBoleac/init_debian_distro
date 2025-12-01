@@ -1,20 +1,46 @@
 #!/bin/bash
 
+# Get latest GO version from official API
+get_latest_go_version() {
+    local fallback="$1"
+    
+    # Try to get latest version from Go API
+    if command -v jq &> /dev/null; then
+        local version=$(curl -s "https://go.dev/dl/?mode=json" 2>/dev/null | \
+                       jq -r '.[0].version' 2>/dev/null | \
+                       sed 's/^go//')
+        
+        if [ -n "$version" ] && [ "$version" != "null" ]; then
+            log_message "INFO" "Go API: Latest stable version is $version"
+            echo "$version"
+            return 0
+        fi
+    fi
+    
+    # Fallback version if API fails or jq not available
+    log_message "WARN" "Could not fetch latest GO version from API, using fallback: $fallback"
+    echo "$fallback"
+    return 1
+}
+
 # Install GO from tar file
 install_GO() {
     local GO_DIRECTORY="$HOME/go"
-    local GO_VERSION=1.23.2
+    local GO_VERSION_FALLBACK="1.23.2"
+    
+    # Verify if GO already exists
+    if [ -d "$GO_DIRECTORY" ]; then
+        log_message "INFO" "GO directory already exists."
+        return
+    fi
+    
+    # Get latest version (with fallback)
+    local GO_VERSION=$(get_latest_go_version "$GO_VERSION_FALLBACK")
     local GO_TAR_FILE="go$GO_VERSION.linux-amd64.tar.gz"
     local GO_URL="https://go.dev/dl/$GO_TAR_FILE"
 
-    log_message "INFO" "Installing GO in progress... Install GO version: $GO_TAR_FILE from a tar file"
+    log_message "INFO" "Installing GO version: $GO_VERSION from tar file"
     log_message "INFO" "Installing it in local directory: $GO_DIRECTORY"
-
-    # Verify if GO already exists
-    if [ -d "$GO_DIRECTORY" ]; then
-        log_message "INFO" "GO directory already exists with version: $GO_VERSION."
-        return
-    fi
 
     verify_command "wget $GO_URL"
 
