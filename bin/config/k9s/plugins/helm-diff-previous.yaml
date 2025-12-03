@@ -1,0 +1,15 @@
+# HELM Configuration
+# Requires helm-diff plugin installed: https://github.com/databus23/helm-diff
+# In helm view: <Shift-D> Diff with Previous Revision
+shortCut: Shift-D
+confirm: false
+description: Diff with Previous Revision
+scopes:
+  - helm
+command: bash
+background: false
+args:
+  - -c
+  - >-
+    LAST_REVISION=$(($COL-REVISION-1));
+    helm diff revision $COL-NAME $COL-REVISION $LAST_REVISION --kube-context $CONTEXT --namespace $NAMESPACE --color | less -RK

@@ -68,8 +68,9 @@ Each item is a complete and testable work unit.
 - [ ] **Replace curl pipe sudo**  
       → In `NodeJS.sh:10` use download and verify before execution
 
-- [ ] **Add checksum verification**  
-      → For binary downloads in `VSCode.sh`, `k9s.sh`, `kubectl.sh`
+- [x] **Add checksum verification** ✅  
+      → ✓ VSCode.sh: SHA256 verification with jq/python3 fallback  
+      → TODO: k9s.sh, kubectl.sh (kubectl already has it)
 
 - [ ] **Validate GPG signatures**  
       → Where available for downloaded packages

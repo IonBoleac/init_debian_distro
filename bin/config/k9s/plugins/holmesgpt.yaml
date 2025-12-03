@@ -1,0 +1,162 @@
+# HolmesGPT - Interactive mode
+# Running via Docker with gcloud mounted from host to avoid installing gcloud in container
+shortCut: Shift-H
+description: HolmesGPT
+scopes:
+  - all
+command: bash
+background: false
+confirm: false
+args:
+  - -c
+  - |
+    #!/bin/bash
+    echo "Hello, HolmesGPT!"
+    source "$K9S_HOME/plugins/.env"
+
+    # Configuration
+    # GEMINI_API_KEY="${GEMINI_API_KEY:-}"
+    GEMINI_API_KEY=${GEMINI_API_KEY:-}  # Set your Gemini API key in the .env file
+    HOLMES_IMAGE="${HOLMES_IMAGE:-us-central1-docker.pkg.dev/genuine-flight-317411/devel/holmes}"
+    HOLMES_MODEL="${HOLMES_MODEL:-gemini/gemini-2.5-pro}"
+    HOLMES_FAST_MODEL="${HOLMES_FAST_MODEL:-gemini/gemini-2.5-flash}"
+
+    # Cleanup function
+    cleanup() {
+        [ -f "$TEMP_KUBECONFIG" ] && rm -f "$TEMP_KUBECONFIG"
+        [ -f "$QUESTION_FILE" ] && rm -f "$QUESTION_FILE"
+    }
+    trap cleanup EXIT
+
+    # Validate prerequisites
+    if [ -z "$GEMINI_API_KEY" ]; then
+        echo "❌ Error: GEMINI_API_KEY environment variable is not set"
+        echo "Set it with: export GEMINI_API_KEY='your-key-here'"
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+    fi
+
+    if ! command -v docker &> /dev/null; then
+        echo "❌ Error: docker is not installed or not in PATH"
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+    fi
+
+    if ! command -v gcloud &> /dev/null; then
+        echo "❌ Error: gcloud is not installed or not in PATH"
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+    fi
+
+    # Find gcloud binary and libs
+    GCLOUD_BIN=$(which gcloud 2>/dev/null)
+    GCLOUD_SDK_ROOT="/usr/lib/google-cloud-sdk"
+
+    # Get GCloud access token
+    ACCESS_TOKEN=$(gcloud auth print-access-token 2>/dev/null || echo "")
+
+    # Create init script to install missing dependencies
+    # INIT_SCRIPT=$(mktemp)
+    # cat > "$INIT_SCRIPT" << 'EOF_INIT_SCRIPT'
+    # #!/bin/bash
+    # # Activate the virtual environment (critical!)
+    # export PATH="/venv/bin:$PATH"
+    # export PYTHONPATH=$PYTHONPATH:.:/app/holmes
+
+    # # Install missing Python modules if needed
+    # if ! python3 -c "import requests" 2>/dev/null; then
+    #   echo "📦 Installing missing Python dependencies..."
+    #   pip3 install --quiet --no-cache-dir requests 2>/dev/null || pip install --quiet --no-cache-dir requests
+    # fi
+    # if ! python3 -c "import pydantic" 2>/dev/null; then
+    #   echo "📦 Installing missing Python dependencies..."
+    #   pip3 install --quiet --no-cache-dir pydantic 2>/dev/null || pip install --quiet --no-cache-dir pydantic
+    # fi
+    # exec python /app/holmes_cli.py "$@"
+    # EOF_INIT_SCRIPT
+    # chmod +x "$INIT_SCRIPT"
+
+    # # per montarli dentro l'immagine fare quanto segue come flag dell'immagine
+    # --entrypoint /init.sh \
+    # -v "$INIT_SCRIPT:/init.sh:ro" \
+
+    # Display context information
+    clear
+    echo "╔════════════════════════════════════════════════════════════════════╗"
+    echo "║              HolmesGPT - Kubernetes AI Assistant                   ║"
+    echo "╚════════════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "📋 Context Information:"
+    echo "  • Cluster:    $CLUSTER"
+    echo "  • Context:    $CONTEXT"
+    echo "  • Namespace:  $NAMESPACE"
+    echo "  • Resource:   $RESOURCE_NAME"
+    echo "  • Name:       $NAME"
+    echo ""
+    echo "=== Using ==="
+    echo "Main model: $HOLMES_MODEL"
+    echo "Fast model: $HOLMES_FAST_MODEL"
+    echo "GEMINI_API_KEY: ${GEMINI_API_KEY:0:10}..."
+    echo "=============="
+
+    # Create temporary kubeconfig
+    TEMP_KUBECONFIG=$(mktemp)
+    if ! kubectl config view --raw > "$TEMP_KUBECONFIG" 2>/dev/null; then
+        echo "❌ Error: Failed to create temporary kubeconfig"
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+    fi
+
+    kubectl --kubeconfig="$TEMP_KUBECONFIG" config use-context "$CONTEXT" > /dev/null 2>&1
+
+    # Prompt for question
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "💭 Enter your question (or press Enter for default):"
+    echo ""
+
+    QUESTION_FILE=$(mktemp)
+    bash -c "read -e -p '❓ ' HOLMES_Q && echo \"\$HOLMES_Q\" > $QUESTION_FILE" < /dev/tty
+    HOLMES_QUESTION=$(cat "$QUESTION_FILE")
+
+    # Use default question if empty
+    if [ -z "$HOLMES_QUESTION" ]; then
+        HOLMES_QUESTION="why is $NAME of $RESOURCE_NAME in namespace $NAMESPACE not working as expected?"
+        echo "Using default question: $HOLMES_QUESTION"
+    fi
+
+    echo ""
+    echo "🔍 Analyzing with HolmesGPT..."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # Run HolmesGPT with gcloud mounted from host
+    docker run -it --rm --net=host \
+        -e GEMINI_API_KEY="$GEMINI_API_KEY" \
+        -e CLOUDSDK_AUTH_ACCESS_TOKEN="$ACCESS_TOKEN" \
+        -e PATH="/venv/bin:/usr/lib/google-cloud-sdk/bin:/usr/bin:/usr/local/bin:/bin" \
+        -e PYTHONPATH=":.:/app/holmes" \
+        -v "$GCLOUD_SDK_ROOT:/usr/lib/google-cloud-sdk:ro" \
+        -v /usr/bin/gcloud:/usr/bin/gcloud:ro \
+        -v /usr/bin/gke-gcloud-auth-plugin:/usr/bin/gke-gcloud-auth-plugin:ro \
+        -v "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+        -v "$HOME/.holmes:/root/.holmes" \
+        -v "$TEMP_KUBECONFIG:/root/.kube/config" \
+        "$HOLMES_IMAGE" \
+        ask \
+        "$HOLMES_QUESTION" \
+        --model="$HOLMES_MODEL" \
+        --fast-model="$HOLMES_FAST_MODEL" \
+        --refresh-toolsets \
+        -t /root/.holmes/gcloud-toolset.yaml
+
+    DOCKER_EXIT_CODE=$?
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if [ $DOCKER_EXIT_CODE -eq 0 ]; then
+        echo "✅ Analysis complete"
+    else
+        echo "⚠️  Analysis completed with exit code: $DOCKER_EXIT_CODE"
+    fi
+    echo ""
+    read -n 1 -s -r -p "Press any key to exit..."

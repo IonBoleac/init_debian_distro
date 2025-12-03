@@ -32,4 +32,14 @@ install_k9s() {
         FAILED_INSTALLATIONS+=("k9s")
         return
     fi
+
+    # copy the k9s plugins
+    cp -r $PARENT_DIRECTORY/bin/config/k9s/plugins $HOME/.k9s/ 2>/dev/null
+
+    # verify plugins copy
+    if [ -d "$HOME/.k9s/plugins" ]; then
+        log_message "INFO" "k9s plugins successfully copied to $HOME/.k9s/plugins"
+    else
+        log_message "WARNING" "Failed to copy k9s plugins to $HOME/.k9s/plugins"
+    fi
 }
