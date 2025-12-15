@@ -16,8 +16,9 @@ Each item is a complete and testable work unit.
 - [ ] **Fix SQLite Browser function name**  
       → In `browser_SQLite.sh` and `constants.sh`: `install_browser-SQLite` → `install_browser_SQLite`
 
-- [ ] **Add error checks to cd commands**  
-      → In `run_app.sh` lines 64, 69, 75, 79 and `bin/terminal_config/font.sh:6`
+- [x] **Add error checks to cd commands** ✅  
+      → ✓ run_app.sh: Already had `|| exit 1` on all cd commands  
+      → ✓ font.sh: Added checks to `cd font_tmp` and `cd ..` with proper error handling
 
 - [ ] **Fix main argument passing**  
       → In `bin/install_softwares.sh:325`: `main $*` → `main "$@"`
