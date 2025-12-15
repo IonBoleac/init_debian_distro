@@ -52,9 +52,10 @@ while true; do
     echo "2. Generate README"
     echo "3. Verify Constants"
     echo "4. Config Terminal"
+    echo "5. Pre-flight Check"
     echo "9. Exit"
 
-    read -p "Choose an option [1-4, 9]: " choice
+    read -p "Choose an option [1-5, 9]: " choice
 
 
 
@@ -85,6 +86,10 @@ while true; do
             cd bin || exit 1
             
             ./config_terminal.sh
+            ;;
+        5)
+            cd bin || exit 1
+            ./preflight_check.sh
             ;;
         9)
             echo "Goodbye!"

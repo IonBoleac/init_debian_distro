@@ -85,7 +85,7 @@ Each item is a complete and testable work unit.
 - [x] **Support automatic latest release** ✅  
       → Use GitHub API/curl to get latest available version
 
-- [ ] **Create .env.example file**   
+- [x] **Create .env.example file**   
       → Template for user configurations (currently only Eduroam commented)
 
 ---
@@ -127,8 +127,9 @@ Each item is a complete and testable work unit.
 - [ ] **Implement update command**  
       → Update already installed software
 
-- [ ] **Add pre-flight checks**  
-      → Verify prerequisites (sudo, internet, disk space) before execution
+- [x] **Add pre-flight checks** ✅  
+      → Created `bin/preflight_check.sh` with 10 comprehensive checks  
+      → Verifies: sudo, internet, DNS, disk space, apt availability, system compatibility, base commands, permissions, user privileges, /tmp space
 
 - [ ] **Implement state tracking**  
       → JSON file that tracks what was installed and when
