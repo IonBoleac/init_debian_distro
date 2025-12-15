@@ -83,6 +83,7 @@ while true; do
             ;;
         4)
             cd bin || exit 1
+            
             ./config_terminal.sh
             ;;
         9)
