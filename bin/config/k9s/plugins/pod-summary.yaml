@@ -1,0 +1,262 @@
+shortCut: Shift-P
+description: Pod Summary
+scopes:
+  - pods
+command: bash
+background: false
+args:
+    - -c
+    - |
+      # Colors
+      RED='\033[0;31m'
+      GREEN='\033[0;32m'
+      YELLOW='\033[1;33m'
+      BLUE='\033[0;34m'
+      BOLD='\033[1m'
+      NC='\033[0m'
+
+      clear
+      echo -e "${BOLD}${BLUE}========================================${NC}"
+      echo -e "${BOLD}${BLUE}Pod Health Check${NC}"
+      echo -e "${BOLD}${BLUE}========================================${NC}"
+      echo ""
+      
+      # Debug info
+      echo -e "${YELLOW}Debug Info:${NC}"
+      echo "NAME: [$NAME]"
+      echo "NAMESPACE: [$NAMESPACE]"
+      echo "POD: [$POD]"
+      echo "CONTEXT: [$CONTEXT]"
+      echo ""
+      
+      # Determine actual pod name and namespace
+      # In pods view: $NAME = pod name, $NAMESPACE = namespace or "-"
+      # If NAMESPACE is "-" or empty, extract from NAME (format: namespace/podname)
+      if [ "$NAMESPACE" = "-" ] || [ -z "$NAMESPACE" ]; then
+        # NAME might be "namespace/podname" in All Pods view
+        if [[ "$NAME" == *"/"* ]]; then
+          POD_NAMESPACE=$(echo "$NAME" | cut -d'/' -f1)
+          POD_NAME=$(echo "$NAME" | cut -d'/' -f2)
+        else
+          echo -e "${RED}✗ Cannot determine namespace for pod: $NAME${NC}"
+          echo ""
+          read -n 1 -s -r -p "Press any key to exit..."
+          exit 1
+        fi
+      else
+        POD_NAMESPACE="$NAMESPACE"
+        POD_NAME="$NAME"
+      fi
+      
+      echo -e "${BOLD}Resolved:${NC}"
+      echo "Pod Name: ${BLUE}$POD_NAME${NC}"
+      echo "Namespace: ${BLUE}$POD_NAMESPACE${NC}"
+      echo ""
+
+      # Get pod details
+      POD_JSON=$(kubectl get pod "$POD_NAME" -n "$POD_NAMESPACE" --context "$CONTEXT" -o json 2>/dev/null)
+      
+      if [ $? -ne 0 ]; then
+        echo -e "${RED}✗ Failed to get pod information${NC}"
+        echo ""
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+      fi
+
+      # Extract key information
+      PHASE=$(echo "$POD_JSON" | jq -r '.status.phase')
+      RESTARTS=$(echo "$POD_JSON" | jq '[.status.containerStatuses[]?.restartCount // 0] | add // 0')
+      READY=$(echo "$POD_JSON" | jq '[.status.conditions[] | select(.type=="Ready")] | .[0].status // "Unknown"')
+      NODE=$(echo "$POD_JSON" | jq -r '.spec.nodeName // "N/A"')
+      START_TIME=$(echo "$POD_JSON" | jq -r '.status.startTime // "N/A"')
+
+      # ========================================
+      # 1. POD STATUS
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}📊 Pod Status${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      
+      # Phase with color
+      if [ "$PHASE" = "Running" ]; then
+        echo -e "Phase: ${GREEN}$PHASE${NC}"
+      elif [ "$PHASE" = "Pending" ]; then
+        echo -e "Phase: ${YELLOW}$PHASE${NC}"
+      else
+        echo -e "Phase: ${RED}$PHASE${NC}"
+      fi
+
+      # Ready status
+      if [ "$READY" = "True" ]; then
+        echo -e "Ready: ${GREEN}$READY${NC}"
+      else
+        echo -e "Ready: ${RED}$READY${NC}"
+      fi
+
+      # Restarts
+      if [ "$RESTARTS" -eq 0 ]; then
+        echo -e "Restarts: ${GREEN}$RESTARTS${NC}"
+      elif [ "$RESTARTS" -lt 5 ]; then
+        echo -e "Restarts: ${YELLOW}$RESTARTS${NC}"
+      else
+        echo -e "Restarts: ${RED}$RESTARTS (HIGH!)${NC}"
+      fi
+
+      echo -e "Node: ${BLUE}$NODE${NC}"
+      echo -e "Started: $START_TIME"
+      echo ""
+
+      # ========================================
+      # 2. CONTAINER STATUS
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}🐳 Container Status${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+      CONTAINER_COUNT=$(echo "$POD_JSON" | jq '[.status.containerStatuses[]?] | length')
+      
+      if [ "$CONTAINER_COUNT" -eq 0 ]; then
+        echo -e "${YELLOW}No container status available${NC}"
+      else
+        echo "$POD_JSON" | jq -r '.status.containerStatuses[]? | 
+          "Container: " + .name + 
+          "\n  State: " + (if .state.running then "✓ Running" 
+                          elif .state.waiting then "⏳ Waiting (" + .state.waiting.reason + ")"
+                          elif .state.terminated then "✗ Terminated (" + .state.terminated.reason + ")"
+                          else "Unknown" end) +
+          "\n  Ready: " + (if .ready then "✓" else "✗" end) +
+          "\n  Restarts: " + (.restartCount | tostring) +
+          (if .restartCount > 0 and .lastState.terminated then 
+            "\n  Last Exit: " + (.lastState.terminated.exitCode | tostring) + 
+            " (" + .lastState.terminated.reason + ")" 
+          else "" end) +
+          "\n  Image: " + .image + "\n"'
+      fi
+
+      # ========================================
+      # 3. RESOURCE USAGE vs LIMITS
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}💾 Resources (Requests / Limits)${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+      echo "$POD_JSON" | jq -r '.spec.containers[]? | 
+        "Container: " + .name +
+        "\n  CPU:    " + (.resources.requests.cpu // "not set") + " / " + (.resources.limits.cpu // "not set") +
+        "\n  Memory: " + (.resources.requests.memory // "not set") + " / " + (.resources.limits.memory // "not set") + "\n"'
+
+      # Try to get actual usage (requires metrics-server)
+      echo -e "\n${BOLD}Current Usage:${NC}"
+      METRICS=$(kubectl top pod "$POD_NAME" -n "$POD_NAMESPACE" --context "$CONTEXT" --no-headers 2>/dev/null)
+      if [ $? -eq 0 ]; then
+        echo "$METRICS" | awk '{printf "  CPU: %s  |  Memory: %s\n", $2, $3}'
+      else
+        echo -e "${YELLOW}  (metrics-server not available)${NC}"
+      fi
+      echo ""
+
+      # ========================================
+      # 4. CONDITIONS
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}🔍 Pod Conditions${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+      echo "$POD_JSON" | jq -r '.status.conditions[]? | 
+        (if .status == "True" then "✓" elif .status == "False" then "✗" else "?" end) + 
+        " " + .type + ": " + .status + 
+        (if .reason then " (" + .reason + ")" else "" end)'
+      echo ""
+
+      # ========================================
+      # 5. RECENT EVENTS
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}📋 Recent Events (Last 10)${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+      EVENTS=$(kubectl get events -n "$POD_NAMESPACE" --context "$CONTEXT" \
+        --field-selector involvedObject.name="$POD_NAME" \
+        --sort-by='.lastTimestamp' \
+        -o json 2>/dev/null | jq -r '
+          .items[-10:]? | reverse | .[] | 
+          .lastTimestamp + " | " + 
+          .type + " | " + 
+          .reason + " | " + 
+          .message' 2>/dev/null)
+
+      if [ -z "$EVENTS" ]; then
+        echo -e "${YELLOW}No recent events${NC}"
+      else
+        echo "$EVENTS" | while IFS='|' read -r time type reason message; do
+          if [[ "$type" == *"Warning"* ]] || [[ "$type" == *"Error"* ]]; then
+            echo -e "${RED}$time |$type |$reason |$message${NC}"
+          elif [[ "$type" == *"Normal"* ]]; then
+            echo -e "${GREEN}$time |$type |$reason |$message${NC}"
+          else
+            echo "$time |$type |$reason |$message"
+          fi
+        done
+      fi
+      echo ""
+
+      # ========================================
+      # 6. HEALTH SUMMARY
+      # ========================================
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      echo -e "${BOLD}🏥 Health Summary${NC}"
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+      ISSUES=0
+
+      # Check phase
+      if [ "$PHASE" != "Running" ]; then
+        echo -e "${RED}✗ Pod is not Running (Phase: $PHASE)${NC}"
+        ((ISSUES++))
+      fi
+
+      # Check ready
+      if [ "$READY" != "True" ]; then
+        echo -e "${RED}✗ Pod is not Ready${NC}"
+        ((ISSUES++))
+      fi
+
+      # Check restarts
+      if [ "$RESTARTS" -gt 5 ]; then
+        echo -e "${RED}✗ High restart count: $RESTARTS${NC}"
+        ((ISSUES++))
+      elif [ "$RESTARTS" -gt 0 ]; then
+        echo -e "${YELLOW}⚠ Pod has restarted $RESTARTS times${NC}"
+      fi
+
+      # Check for waiting containers
+      WAITING=$(echo "$POD_JSON" | jq '[.status.containerStatuses[]? | select(.state.waiting)] | length')
+      if [ "$WAITING" -gt 0 ]; then
+        echo -e "${YELLOW}⚠ $WAITING container(s) waiting${NC}"
+        ((ISSUES++))
+      fi
+
+      # Check for terminated containers
+      TERMINATED=$(echo "$POD_JSON" | jq '[.status.containerStatuses[]? | select(.state.terminated)] | length')
+      if [ "$TERMINATED" -gt 0 ]; then
+        echo -e "${RED}✗ $TERMINATED container(s) terminated${NC}"
+        ((ISSUES++))
+      fi
+
+      # Check for resource limits
+      NO_LIMITS=$(echo "$POD_JSON" | jq '[.spec.containers[]? | select(.resources.limits == null or .resources.limits == {})] | length')
+      if [ "$NO_LIMITS" -gt 0 ]; then
+        echo -e "${YELLOW}⚠ $NO_LIMITS container(s) without resource limits${NC}"
+      fi
+
+      echo ""
+      if [ "$ISSUES" -eq 0 ]; then
+        echo -e "${GREEN}${BOLD}✓ Pod appears healthy!${NC}"
+      else
+        echo -e "${RED}${BOLD}Found $ISSUES issue(s) that need attention${NC}"
+      fi
+
+      echo ""
+      echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+      read -n 1 -s -r -p "Press any key to exit..."
+      echo ""

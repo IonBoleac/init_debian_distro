@@ -1,0 +1,100 @@
+# kubectl lineage plugin - Display dependencies of any Kubernetes resource
+# https://github.com/tohjustin/kube-lineage
+shortCut: Shift-L
+description: Show resource lineage
+scopes:
+  - all
+command: bash
+background: false
+confirm: false
+args:
+    - -c
+    - |
+      # Colors
+      RED='\033[0;31m'
+      GREEN='\033[0;32m'
+      YELLOW='\033[1;33m'
+      BLUE='\033[0;34m'
+      CYAN='\033[0;36m'
+      BOLD='\033[1m'
+      NC='\033[0m'
+
+      clear
+      echo -e "${BOLD}${CYAN}========================================${NC}"
+      echo -e "${BOLD}${CYAN}Resource Lineage${NC}"
+      echo -e "${BOLD}${CYAN}========================================${NC}"
+      echo ""
+      
+      # Check if kubectl lineage is installed
+      if ! command -v kubectl-lineage &> /dev/null; then
+        echo -e "${RED}✗ kubectl lineage is not installed${NC}"
+        echo ""
+        echo -e "${YELLOW}Install it with:${NC}"
+        echo "  kubectl krew install lineage"
+        echo ""
+        echo -e "${YELLOW}Or consider updating it for newer features:${NC}"
+        echo "  kubectl krew upgrade lineage"
+        echo ""
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 1
+      fi
+
+      # k9s provides: $NAME, $NAMESPACE, $RESOURCE_NAME, $GROUP, $CONTEXT
+      echo -e "${BLUE}Resource:${NC}  $RESOURCE_NAME/$NAME"
+      if [ "$NAMESPACE" != "-" ] && [ -n "$NAMESPACE" ]; then
+        echo -e "${BLUE}Namespace:${NC} $NAMESPACE"
+      fi
+      echo -e "${BLUE}Context:${NC}   $CONTEXT"
+      echo ""
+      echo -e "${YELLOW}Fetching dependencies...${NC}"
+      echo ""
+
+      # Base command parts
+      CMD_BASE="kubectl lineage"
+      CMD_CONTEXT_NS=""
+
+      # Add namespace if the resource is namespaced
+      if [ "$NAMESPACE" != "-" ] && [ -n "$NAMESPACE" ]; then
+        CMD_CONTEXT_NS="$CMD_CONTEXT_NS --namespace=$NAMESPACE"
+      fi
+      
+      # Add context for accuracy
+      if [ -n "$CONTEXT" ]; then
+        CMD_CONTEXT_NS="$CMD_CONTEXT_NS --context=$CONTEXT"
+      fi
+
+      # Detect if it's a Helm release secret and use the 'helm' subcommand
+      if [[ "$RESOURCE_NAME" == "secrets" && "$NAME" == sh.helm.release.* ]]; then
+        # Extract release name from the secret name
+        RELEASE_NAME=$(echo "$NAME" | sed -e 's/sh.helm.release.v1.//' -e 's/\.v[0-9]*$//')
+        echo -e "${BLUE}Helm Release:${NC} $RELEASE_NAME"
+        echo ""
+        # Use --depth=1 to show resources provisioned by the release
+        CMD="$CMD_BASE helm $RELEASE_NAME $CMD_CONTEXT_NS --depth=1 --output=wide"
+      else
+        # For all other resources, use the standard lineage command
+        # Build the full resource type (e.g., "deployments.apps")
+        RESOURCE_TYPE="$RESOURCE_NAME"
+        if [ -n "$GROUP" ]; then
+          RESOURCE_TYPE="${RESOURCE_NAME}.${GROUP}"
+        fi
+        # Use --dependencies (-D) flag which is supported by older versions
+        CMD="$CMD_BASE $RESOURCE_TYPE/$NAME $CMD_CONTEXT_NS --dependencies --output=wide"
+      fi
+      
+      # Execute the command
+      echo -e "${CYAN}Executing: $CMD${NC}"
+      echo ""
+      eval $CMD
+      
+      EXIT_CODE=$?
+      echo ""
+      
+      if [ $EXIT_CODE -eq 0 ]; then
+        echo -e "${GREEN}✓ Lineage displayed successfully${NC}"
+      else
+        echo -e "${RED}✗ Failed to display lineage (exit code: $EXIT_CODE)${NC}"
+      fi
+      
+      echo ""
+      read -n 1 -s -r -p "Press any key to exit..."

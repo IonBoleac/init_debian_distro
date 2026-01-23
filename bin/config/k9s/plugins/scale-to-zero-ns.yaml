@@ -1,0 +1,132 @@
+# Scale all deployments and statefulsets to zero in a namespace
+shortCut: Shift-Z
+description: Scale all pods to 0
+dangerous: true
+scopes:
+  - namespaces
+command: bash
+background: false
+args:
+    - -c
+    - |
+      GREEN='\033[0;32m'
+      RED='\033[0;31m'
+      YELLOW='\033[1;33m'
+      BLUE='\033[0;34m'
+      NC='\033[0m'
+
+      clear
+      echo -e "${YELLOW}╔════════════════════════════════════════════════════════════════╗${NC}"
+      echo -e "${YELLOW}║       Scale All Resources to Zero in Namespace                 ║${NC}"
+      echo -e "${YELLOW}╚════════════════════════════════════════════════════════════════╝${NC}"
+      echo ""
+      echo -e "${BLUE}Namespace:${NC} $NAME"
+      echo -e "${BLUE}Context:${NC}   $CONTEXT"
+      echo ""
+
+      # Get all deployments and statefulsets in the namespace
+      DEPLOYMENTS=$(kubectl --context=$CONTEXT -n=$NAME get deployments -o jsonpath='{.items[*].metadata.name}')
+      STATEFULSETS=$(kubectl --context=$CONTEXT -n=$NAME get statefulsets -o jsonpath='{.items[*].metadata.name}')
+      DAEMONSETS=$(kubectl --context=$CONTEXT -n=$NAME get daemonsets -o jsonpath='{.items[*].metadata.name}')
+
+      DEP_COUNT=$(echo $DEPLOYMENTS | wc -w)
+      STS_COUNT=$(echo $STATEFULSETS | wc -w)
+      DS_COUNT=$(echo $DAEMONSETS | wc -w)
+      TOTAL=$((DEP_COUNT + STS_COUNT + DS_COUNT))
+
+      if [ $TOTAL -eq 0 ]; then
+        echo -e "${YELLOW}No deployments or statefulsets or daemonsets found in namespace $NAME${NC}"
+        echo ""
+        read -n 1 -s -r -p "Press any key to exit..."
+        exit 0
+      fi
+
+      # Show deployments
+      if [ $DEP_COUNT -gt 0 ]; then
+        echo -e "${GREEN}Found $DEP_COUNT deployment(s):${NC}"
+        for dep in $DEPLOYMENTS; do
+          REPLICAS=$(kubectl --context=$CONTEXT -n=$NAME get deployment $dep -o jsonpath='{.spec.replicas}')
+          echo -e "  • ${BLUE}$dep${NC} (replicas: $REPLICAS)"
+        done
+        echo ""
+      fi
+
+      # Show statefulsets
+      if [ $STS_COUNT -gt 0 ]; then
+        echo -e "${GREEN}Found $STS_COUNT statefulset(s):${NC}"
+        for sts in $STATEFULSETS; do
+          REPLICAS=$(kubectl --context=$CONTEXT -n=$NAME get statefulset $sts -o jsonpath='{.spec.replicas}')
+          echo -e "  • ${BLUE}$sts${NC} (replicas: $REPLICAS)"
+        done
+        echo ""
+      fi
+
+      # Show daemonsets
+      if [ $DS_COUNT -gt 0 ]; then
+        echo -e "${GREEN}Found $DS_COUNT daemonset(s):${NC}"
+        for ds in $DAEMONSETS; do
+          REPLICAS=$(kubectl --context=$CONTEXT -n=$NAME get daemonset $ds -o jsonpath='{.spec.replicas}')
+          echo -e "  • ${BLUE}$ds${NC} (replicas: $REPLICAS)"
+        done
+        echo ""
+      fi
+
+      # Final confirmation
+      echo -e "${RED}⚠️  WARNING: This will scale ALL $TOTAL resource(s) to 0 replicas!${NC}"
+      echo ""
+      read -p "Type 'yes' to confirm: " CONFIRMATION
+
+      if [ "$CONFIRMATION" != "yes" ]; then
+        echo -e "${YELLOW}Operation cancelled${NC}"
+        sleep 2
+        exit 0
+      fi
+
+      echo ""
+      echo -e "${GREEN}Scaling resources to 0...${NC}"
+      echo ""
+
+      FAILED=0
+
+      # Scale deployments
+      for dep in $DEPLOYMENTS; do
+        echo -n "Scaling deployment/$dep... "
+        if kubectl --context=$CONTEXT -n=$NAME scale deployment/$dep --replicas=0 &>/dev/null; then
+          echo -e "${GREEN}✓${NC}"
+        else
+          echo -e "${RED}✗${NC}"
+          FAILED=$((FAILED + 1))
+        fi
+      done
+
+      # Scale statefulsets
+      for sts in $STATEFULSETS; do
+        echo -n "Scaling statefulset/$sts... "
+        if kubectl --context=$CONTEXT -n=$NAME scale statefulset/$sts --replicas=0 &>/dev/null; then
+          echo -e "${GREEN}✓${NC}"
+        else
+          echo -e "${RED}✗${NC}"
+          FAILED=$((FAILED + 1))
+        fi
+      done
+
+      # Scale daemonsets
+      for ds in $DAEMONSETS; do
+        echo -n "Scaling daemonset/$ds... "
+        if kubectl --context=$CONTEXT -n=$NAME scale daemonset/$ds --replicas=0 &>/dev/null; then
+          echo -e "${GREEN}✓${NC}"
+        else
+          echo -e "${RED}✗${NC}"
+          FAILED=$((FAILED + 1))
+        fi
+      done
+
+      echo ""
+      if [ $FAILED -eq 0 ]; then
+        echo -e "${GREEN}✓ All resources scaled to 0 successfully${NC}"
+      else
+        echo -e "${YELLOW}⚠ $FAILED resource(s) failed to scale${NC}"
+      fi
+
+      echo ""
+      read -n 1 -s -r -p "Press any key to exit..."

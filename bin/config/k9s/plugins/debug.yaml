@@ -1,14 +1,13 @@
 # Debug net tools using nicolaka/netshoot
 # https://github.com/nicolaka/netshoot
 shortCut: Shift-D
-description: Debug net linux tools
+description: Net linux tools
 dangerous: true
 scopes:
   - containers
-  - pods
 command: bash
 background: false
 confirm: true
 args:
   - -c
-  - "kubectl --kubeconfig=$KUBECONFIG debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.14 --share-processes -- bash"
+  - "kubectl --kubeconfig=$KUBECONFIG debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.14 --share-processes -- zsh"

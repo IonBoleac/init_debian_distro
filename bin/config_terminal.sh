@@ -17,8 +17,19 @@ echo "Installing base packages (curl, wget, zsh)..."
 if ! sudo apt install -y curl wget zsh; then
     echo "✗ Failed to install base packages (curl, wget, zsh)"
     FAILED_INSTALLS+=("base packages")
+    echo "Exiting due to failure in installing base packages."
+    exit 1
 else
     echo "✓ Base packages installed successfully"
+fi
+
+# Change default shell to zsh
+echo "Changing default shell to zsh..."
+if chsh -s /usr/bin/zsh; then
+    echo "✓ Default shell changed to zsh"
+else
+    echo "✗ Failed to change default shell to zsh"
+    FAILED_INSTALLS+=("default shell change to zsh")
 fi
 
 # Install EZA

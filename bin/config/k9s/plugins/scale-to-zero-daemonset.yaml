@@ -1,0 +1,36 @@
+# Scale a daemonset to 0
+shortCut: Shift-Z
+description: Scale pods to 0
+dangerous: true
+scopes:
+  - daemonsets
+command: bash
+background: false
+args:
+    - -c
+    - |
+      GREEN='\033[0;32m'
+      RED='\033[0;31m'
+      YELLOW='\033[1;33m'
+      BLUE='\033[0;34m'
+      NC='\033[0m'
+
+      clear
+      echo -e "${YELLOW}╔════════════════════════════════════════════════════════════════╗${NC}"
+      echo -e "${YELLOW}║       Scale to Zero Daemonset                                 ║${NC}"
+      echo -e "${YELLOW}╚════════════════════════════════════════════════════════════════╝${NC}"
+      echo ""
+      echo -e "${BLUE}Namespace:${NC} $NAMESPACE"
+      echo -e "${BLUE}Context:${NC}   $CONTEXT"
+      echo -e "${BLUE}Daemonset:${NC} $NAME"
+      echo ""
+
+      kubectl --context=$CONTEXT -n=$NAMESPACE scale daemonset/$NAME --replicas=0 &>/dev/null
+      if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ daemonset/$NAME scaled to 0 successfully${NC}"
+      else
+        echo -e "${RED}✗ Failed to scale daemonset/$NAME${NC}"
+      fi
+
+      echo ""
+      read -n 1 -s -r -p "Press any key to exit..."

@@ -1,0 +1,41 @@
+shortCut: Shift-L
+description: "logs|less"
+scopes:
+  - po
+command: bash
+background: false
+args:
+  - -c
+  - '"$@" | less'
+  - dummy-arg
+  - kubectl
+  - logs
+  - $NAME
+  - -n
+  - $NAMESPACE
+  - --context
+  - $CONTEXT
+  - --kubeconfig
+  - $KUBECONFIG
+---
+shortCut: Shift-L
+description: "logs|less"
+scopes:
+  - containers
+command: bash
+background: false
+args:
+  - -c
+  - '"$@" | less'
+  - dummy-arg
+  - kubectl
+  - logs
+  - -c
+  - $NAME
+  - $POD
+  - -n
+  - $NAMESPACE
+  - --context
+  - $CONTEXT
+  - --kubeconfig
+  - $KUBECONFIG

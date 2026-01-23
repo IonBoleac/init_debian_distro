@@ -52,9 +52,6 @@ args:
     GCLOUD_BIN=$(which gcloud 2>/dev/null)
     GCLOUD_SDK_ROOT="/usr/lib/google-cloud-sdk"
 
-    # Get GCloud access token
-    ACCESS_TOKEN=$(gcloud auth print-access-token 2>/dev/null || echo "")
-
     # Create init script to install missing dependencies
     # INIT_SCRIPT=$(mktemp)
     # cat > "$INIT_SCRIPT" << 'EOF_INIT_SCRIPT'
@@ -128,6 +125,9 @@ args:
     echo "🔍 Analyzing with HolmesGPT..."
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
+
+    # Get GCloud access token
+    ACCESS_TOKEN=$(gcloud auth print-access-token 2>/dev/null || echo "")
 
     # Run HolmesGPT with gcloud mounted from host
     docker run -it --rm --net=host \
