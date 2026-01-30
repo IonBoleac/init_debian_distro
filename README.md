@@ -3,6 +3,7 @@ When you get a new PC, you need to install some basic software to make it usable
 
 ## Available Software Tools to be installed
 The following software are supported to be installed by the script:
+   - [argocd](https://argo-cd.readthedocs.io/en/stable/cli_installation/): Argo CD CLI tool.
    - [kubectl](https://kubernetes.io/docs/reference/kubectl/): command-line tool for controlling Kubernetes clusters.
    - [Microk8s](https://microk8s.io/): Lightweight Kubernetes for workstations and appliances.
    - [Node.js](https://nodejs.org/en/): JavaScript runtime built on Chrome's V8 JavaScript engine.
@@ -15,6 +16,7 @@ The following software are supported to be installed by the script:
    - [k9s](https://github.com/derailed/k9s): Kubernetes CLI to manage and observe your clusters in style.
    - [nvm](https://github.com/nvm-sh/nvm#installing-and-updating): Node Version Manager - manages multiple Node.js versions.
    - [Helm](https://helm.sh/): Package manager for Kubernetes.
+   - [argocd-autopilot](https://argoproj-labs.github.io/argocd-autopilot/): Argo CD Autopilot CLI tool.
    - [Brave](https://brave.com/): Privacy-focused web browser.
    - [kind](https://kind.sigs.k8s.io/): Tool for running local Kubernetes clusters using Docker container nodes.
    - [Docker](https://www.docker.com/): Platform for building, sharing, and running applications with containers.
@@ -59,6 +61,7 @@ Options:
   -h, --help                               # Show this help message
 
 Software options for --install and --all-excluding:
+  argocd                                   # Argo CD CLI tool. https://argo-cd.readthedocs.io/en/stable/cli_installation/
   kubectl                                  # command-line tool for controlling Kubernetes clusters. https://kubernetes.io/docs/reference/kubectl/
   Microk8s                                 # Lightweight Kubernetes for workstations and appliances. https://microk8s.io/
   Node.js                                  # JavaScript runtime built on Chrome's V8 JavaScript engine. https://nodejs.org/en/
@@ -71,6 +74,7 @@ Software options for --install and --all-excluding:
   k9s                                      # Kubernetes CLI to manage and observe your clusters in style. https://github.com/derailed/k9s
   nvm                                      # Node Version Manager - manages multiple Node.js versions. https://github.com/nvm-sh/nvm#installing-and-updating
   Helm                                     # Package manager for Kubernetes. https://helm.sh/
+  argocd-autopilot                         # Argo CD Autopilot CLI tool. https://argoproj-labs.github.io/argocd-autopilot/
   Brave                                    # Privacy-focused web browser. https://brave.com/
   kind                                     # Tool for running local Kubernetes clusters using Docker container nodes. https://kind.sigs.k8s.io/
   Docker                                   # Platform for building, sharing, and running applications with containers. https://www.docker.com/
