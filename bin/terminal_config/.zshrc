@@ -142,6 +142,16 @@ if [ -x "$(command -v crd-wizard)" ]; then
     source <(crd-wizard completion zsh)
 fi
 
+# argocd autocompletion
+if [ -x "$(command -v argocd)" ]; then
+    source <(argocd completion zsh)
+fi
+
+# argocd-autopilot autocompletion
+if [ -x "$(command -v argocd-autopilot)" ]; then
+    source <(argocd-autopilot completion zsh)
+fi
+
 # NVM (Node Version Manager) controll if .nvm directory exists
 if [ -d "$HOME/.nvm" ]; then
     export NVM_DIR="$HOME/.nvm"
@@ -157,3 +167,7 @@ fi
 if [ -d "${KREW_ROOT:-$HOME/.krew}/bin" ]; then
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
+
+
+# Global variables
+export K9S_HOME="$HOME/.config/k9s"

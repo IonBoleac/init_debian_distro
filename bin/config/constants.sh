@@ -20,7 +20,8 @@ declare -A SOFTWARE_DETAILS=(
     ["Helm"]="install_helm;curl;Package manager for Kubernetes.;https://helm.sh/"
     ["nvm"]="install_nvm;curl;Node Version Manager - manages multiple Node.js versions.;https://github.com/nvm-sh/nvm#installing-and-updating"
     ["k9s"]="install_k9s;wget;Kubernetes CLI to manage and observe your clusters in style.;https://github.com/derailed/k9s"
-
+    ["argocd"]="install_argocd;wget;Argo CD CLI tool.;https://argo-cd.readthedocs.io/en/stable/cli_installation/"
+    ["argocd-autopilot"]="install_argocd_autopilot;curl;Argo CD Autopilot CLI tool.;https://argoproj-labs.github.io/argocd-autopilot/"
     #["test"]="test;test;test;test"
 )
 export SOFTWARE_DETAILS
