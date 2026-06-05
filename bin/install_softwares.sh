@@ -31,12 +31,12 @@ verify_command() {
 # Function to install packages using apt-get
 apt_get_install() {
     if [ "$DRY_RUN" -eq 1 ]; then
-        log_message "INFO" "[DRY-RUN] Would install package: $1"
+        log_message "INFO" "[DRY-RUN] Would install package(s): $*"
         return 0
     fi
-    
-    sudo apt-get install -y "$1" > /dev/null 2>> "$LOG_FILE"
-    #log_message "INFO" "$1 successfully installed"
+
+    sudo apt-get install -y "$@" > /dev/null 2>> "$LOG_FILE"
+    return $?
 }
 
 # init script function needed to run the script
