@@ -17,7 +17,7 @@ install_kubectl() {
     # fi
 
     # Download kubectl
-    verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl""
+    verify_command "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download kubectl. Check your internet connection or try manually: curl -LO https://dl.k8s.io/release/stable.txt"
@@ -27,7 +27,7 @@ install_kubectl() {
 
 
     # Verify the kubectl binary
-    verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256""
+    verify_command "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
 
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download kubectl.sha256. Check your internet connection and try again."

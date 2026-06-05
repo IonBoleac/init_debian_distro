@@ -45,7 +45,7 @@ install_Docker() {
     sudo apt-get update
 
     # Install Docker
-    verify_command "apt_get_install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+    verify_command "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
 
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to install Docker. Run 'sudo apt-get update' and check repository configuration. See logs for details."

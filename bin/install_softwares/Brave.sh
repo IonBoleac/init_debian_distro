@@ -29,7 +29,6 @@ install_Brave() {
     
     apt_get_install brave-browser
 
-    verify_command "apt_get_install brave-browser"
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to install Brave. Run 'sudo apt-get update' and check if repository was added correctly."
         FAILED_INSTALLATIONS+=("Brave")

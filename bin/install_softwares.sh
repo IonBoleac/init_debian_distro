@@ -270,7 +270,7 @@ install_functions() {
             log_message "INFO" "[DRY-RUN] Would install all software except: ${exclude[*]}"
         fi
         for software in "${!INSTALL_FUNCTIONS[@]}"; do
-            if [[ ! " ${exclude[*]} " =~ ${software} ]]; then
+            if [[ ! " ${exclude[*]} " =~ " ${software} " ]]; then
                 ${INSTALL_FUNCTIONS[$software]}
             else
                 if [ "$DRY_RUN" -eq 1 ]; then
@@ -388,4 +388,4 @@ main() {
     
 }
 
-main $*
+main "$@"

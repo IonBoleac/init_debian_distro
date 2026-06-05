@@ -12,6 +12,6 @@ install_argocd_autopilot() {
     fi
     export VERSION
     VERSION=$(curl --silent "https://api.github.com/repos/argoproj-labs/argocd-autopilot/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    verify_command "curl -L https://github.com/argoproj-labs/argocd-autopilot/releases/download/"$VERSION"/argocd-autopilot-linux-amd64.tar.gz | tar -xvzf -"
-    verify_command " mv ./argocd-autopilot-* /usr/local/bin/argocd-autopilot"
+    verify_command "curl -L https://github.com/argoproj-labs/argocd-autopilot/releases/download/${VERSION}/argocd-autopilot-linux-amd64.tar.gz | tar -xvzf -"
+    verify_command "mv ./argocd-autopilot-* /usr/local/bin/argocd-autopilot"
 }
