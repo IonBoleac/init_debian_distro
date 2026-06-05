@@ -9,7 +9,6 @@ install_argocd_autopilot() {
     AARCH="$(dpkg --print-architecture)"   # amd64 / arm64
 
     if [ "$DRY_RUN" -eq 1 ]; then
-        log_message "INFO" "[DRY-RUN] Would check if argocd-autopilot is installed"
         log_message "INFO" "[DRY-RUN] Would download argocd-autopilot-linux-${AARCH}.tar.gz from official GitHub release"
         log_message "INFO" "[DRY-RUN] Would install argocd-autopilot binary to /usr/local/bin/argocd-autopilot"
         log_message "INFO" "Argo CD Autopilot CLI tool successfully installed"

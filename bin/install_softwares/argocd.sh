@@ -9,7 +9,6 @@ install_argocd() {
     AARCH="$(dpkg --print-architecture)"   # amd64 / arm64
 
     if [ "$DRY_RUN" -eq 1 ]; then
-        log_message "INFO" "[DRY-RUN] Would check if argocd is installed"
         log_message "INFO" "[DRY-RUN] Would download argocd-linux-${AARCH} from official GitHub release"
         log_message "INFO" "[DRY-RUN] Would install argocd binary to /usr/local/bin/argocd"
         log_message "INFO" "Argo CD CLI tool successfully installed"

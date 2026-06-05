@@ -77,7 +77,7 @@ do
         res="y"
         echo "Automatic installation started."
     else
-        read -n 1 res
+        read -rn 1 res
         echo ""  # Add newline after reading single character
     fi
 
@@ -151,22 +151,22 @@ clone_or_update "https://github.com/zsh-users/zsh-autosuggestions" \
 
 # Copy configuration files
 echo "Copying configuration files..."
-if [ -f $HOME/.zshrc ]; then
-    cp $HOME/.zshrc $HOME/.zshrc_bckp
+if [ -f "$HOME/.zshrc" ]; then
+    cp "$HOME/.zshrc" "$HOME/.zshrc_bckp"
     echo "✓ Backed up existing .zshrc to .zshrc_bckp"
 fi
-if cp $TERMINAL_CONFIG/.zshrc $HOME/.zshrc; then
+if cp "$TERMINAL_CONFIG/.zshrc" "$HOME/.zshrc"; then
     echo "✓ Copied .zshrc"
 else
     echo "✗ Failed to copy .zshrc"
     FAILED_INSTALLS+=(".zshrc configuration")
 fi
 
-if [ -f $HOME/.p10k.zsh ]; then
-    cp $HOME/.p10k.zsh $HOME/.p10k.zsh_bckp
+if [ -f "$HOME/.p10k.zsh" ]; then
+    cp "$HOME/.p10k.zsh" "$HOME/.p10k.zsh_bckp"
     echo "✓ Backed up existing .p10k.zsh to .p10k.zsh_bckp"
 fi
-if cp $TERMINAL_CONFIG/.p10k.zsh $HOME/.p10k.zsh; then
+if cp "$TERMINAL_CONFIG/.p10k.zsh" "$HOME/.p10k.zsh"; then
     echo "✓ Copied .p10k.zsh"
 else
     echo "✗ Failed to copy .p10k.zsh"

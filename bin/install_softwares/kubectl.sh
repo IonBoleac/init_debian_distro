@@ -22,18 +22,14 @@ install_kubectl() {
     KUBECTL_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
 
     # Download kubectl
-    verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl"
-
-    if [ $? -ne 0 ]; then
+    if ! verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl"; then
         log_message "ERROR" "Failed to download kubectl. Check your internet connection or try manually: curl -LO https://dl.k8s.io/release/stable.txt"
         FAILED_INSTALLATIONS+=("kubectl")
         return
     fi
 
     # Verify the kubectl binary
-    verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl.sha256"
-
-    if [ $? -ne 0 ]; then
+    if ! verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl.sha256"; then
         log_message "ERROR" "Failed to download kubectl.sha256. Check your internet connection and try again."
         FAILED_INSTALLATIONS+=("kubectl")
         return
@@ -94,7 +90,7 @@ install_kubectl() {
             res="y"
             echo "Automatic installation started."
         else
-            read -n 1 res || { echo ""; echo "No input (EOF): skipping krew."; break; }
+            read -rn 1 res || { echo ""; echo "No input (EOF): skipping krew."; break; }
             echo ""  # Add newline after reading single character
         fi
 
