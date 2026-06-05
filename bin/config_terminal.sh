@@ -25,11 +25,15 @@ fi
 
 # Change default shell to zsh
 echo "Changing default shell to zsh..."
-if chsh -s /usr/bin/zsh; then
-    echo "✓ Default shell changed to zsh"
+if [ "$SHELL" = "/usr/bin/zsh" ] || [ "$SHELL" = "/bin/zsh" ]; then
+    echo "✓ Default shell is already zsh"
 else
-    echo "✗ Failed to change default shell to zsh"
-    FAILED_INSTALLS+=("default shell change to zsh")
+    if sudo chsh -s /usr/bin/zsh "$USER"; then
+        echo "✓ Default shell changed to zsh"
+    else
+        echo "✗ Failed to change default shell to zsh"
+        FAILED_INSTALLS+=("default shell change to zsh")
+    fi
 fi
 
 # Install EZA
@@ -81,7 +85,7 @@ do
     case $res in
         y|Y)
             echo "Installing Neovim..."
-            if chmod +x $TERMINAL_CONFIG/nvim.sh && sh $TERMINAL_CONFIG/nvim.sh; then
+            if chmod +x "$TERMINAL_CONFIG/nvim.sh" && sh "$TERMINAL_CONFIG/nvim.sh"; then
                 echo "✓ Neovim installed successfully"
             else
                 echo "✗ Failed to install Neovim"
@@ -101,40 +105,64 @@ done
 
 # Oh-my-zsh
 echo "Installing Oh-my-zsh..."
-if mkdir -p ohmyzsh && cd ohmyzsh && \
-   curl -fsLO https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh && \
-   sed -i 's/exec zsh -l/#exec zsh -l/g' ./install.sh && \
-   sh ./install.sh && \
-   rm ./install.sh && \
-   cd .. && \
-   rm -rf ohmyzsh; then
-    echo "✓ Oh-my-zsh installed successfully"
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "✓ Oh-my-zsh is already installed, skipping"
 else
-    echo "✗ Failed to install Oh-my-zsh"
-    FAILED_INSTALLS+=("Oh-my-zsh")
-    cd .. 2>/dev/null
-    rm -rf ohmyzsh 2>/dev/null
+    if mkdir -p ohmyzsh && cd ohmyzsh && \
+       curl -fsLO https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh && \
+       sed -i 's/exec zsh -l/#exec zsh -l/g' ./install.sh && \
+       sh ./install.sh --unattended && \
+       rm ./install.sh && \
+       cd .. && \
+       rm -rf ohmyzsh; then
+        echo "✓ Oh-my-zsh installed successfully"
+    else
+        echo "✗ Failed to install Oh-my-zsh"
+        FAILED_INSTALLS+=("Oh-my-zsh")
+        cd .. 2>/dev/null
+        rm -rf ohmyzsh 2>/dev/null
+    fi
 fi
 
 # Theme
 echo "Installing Powerlevel10k theme..."
-if git clone https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2>/dev/null; then
-    echo "✓ Powerlevel10k theme installed successfully"
+P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+if [ -d "$P10K_DIR" ]; then
+    echo "✓ Powerlevel10k theme already installed, updating..."
+    git -C "$P10K_DIR" pull --quiet 2>/dev/null || echo "⚠ Could not update Powerlevel10k"
 else
-    echo "✗ Failed to install Powerlevel10k theme (may already exist)"
+    if git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR" 2>/dev/null; then
+        echo "✓ Powerlevel10k theme installed successfully"
+    else
+        echo "✗ Failed to install Powerlevel10k theme"
+        FAILED_INSTALLS+=("Powerlevel10k")
+    fi
 fi
 
 # Plugins
 echo "Installing zsh plugins..."
 PLUGIN_SUCCESS=true
-if ! git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2>/dev/null; then
-    echo "✗ Failed to install zsh-syntax-highlighting (may already exist)"
-    PLUGIN_SUCCESS=false
+
+ZSH_HIGHLIGHT_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+if [ -d "$ZSH_HIGHLIGHT_DIR" ]; then
+    echo "✓ zsh-syntax-highlighting already installed, updating..."
+    git -C "$ZSH_HIGHLIGHT_DIR" pull --quiet 2>/dev/null || echo "⚠ Could not update zsh-syntax-highlighting"
+else
+    if ! git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_HIGHLIGHT_DIR" 2>/dev/null; then
+        echo "✗ Failed to install zsh-syntax-highlighting"
+        PLUGIN_SUCCESS=false
+    fi
 fi
 
-if ! git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2>/dev/null; then
-    echo "✗ Failed to install zsh-autosuggestions (may already exist)"
-    PLUGIN_SUCCESS=false
+ZSH_AUTOSUGGEST_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+if [ -d "$ZSH_AUTOSUGGEST_DIR" ]; then
+    echo "✓ zsh-autosuggestions already installed, updating..."
+    git -C "$ZSH_AUTOSUGGEST_DIR" pull --quiet 2>/dev/null || echo "⚠ Could not update zsh-autosuggestions"
+else
+    if ! git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGEST_DIR" 2>/dev/null; then
+        echo "✗ Failed to install zsh-autosuggestions"
+        PLUGIN_SUCCESS=false
+    fi
 fi
 
 if [ "$PLUGIN_SUCCESS" = true ]; then
@@ -143,22 +171,22 @@ fi
 
 # Copy configuration files
 echo "Copying configuration files..."
-if [ -f $HOME/.zshrc ]; then
-    cp $HOME/.zshrc $HOME/.zshrc_bckp
+if [ -f "$HOME/.zshrc" ]; then
+    cp "$HOME/.zshrc" "$HOME/.zshrc_bckp"
     echo "✓ Backed up existing .zshrc to .zshrc_bckp"
 fi
-if cp $TERMINAL_CONFIG/.zshrc $HOME/.zshrc; then
+if cp "$TERMINAL_CONFIG/.zshrc" "$HOME/.zshrc"; then
     echo "✓ Copied .zshrc"
 else
     echo "✗ Failed to copy .zshrc"
     FAILED_INSTALLS+=(".zshrc configuration")
 fi
 
-if [ -f $HOME/.p10k.zsh ]; then
-    cp $HOME/.p10k.zsh $HOME/.p10k.zsh_bckp
+if [ -f "$HOME/.p10k.zsh" ]; then
+    cp "$HOME/.p10k.zsh" "$HOME/.p10k.zsh_bckp"
     echo "✓ Backed up existing .p10k.zsh to .p10k.zsh_bckp"
 fi
-if cp $TERMINAL_CONFIG/.p10k.zsh $HOME/.p10k.zsh; then
+if cp "$TERMINAL_CONFIG/.p10k.zsh" "$HOME/.p10k.zsh"; then
     echo "✓ Copied .p10k.zsh"
 else
     echo "✗ Failed to copy .p10k.zsh"
@@ -167,7 +195,7 @@ fi
 
 # Fonts
 echo "Installing fonts..."
-if chmod +x $TERMINAL_CONFIG/font.sh && sh $TERMINAL_CONFIG/font.sh; then
+if chmod +x "$TERMINAL_CONFIG/font.sh" && sh "$TERMINAL_CONFIG/font.sh"; then
     echo "✓ Fonts installed successfully"
 else
     echo "✗ Failed to install fonts"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Function to install SQLite CLI
-intall_SQLite_CLI() {
+install_SQLite_CLI() {
     log_message "INFO" "Installing SQLite CLI in progress..."
     # Verify if SQLite is already installed
     is_installed "sqlite3" && return

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Resolve script directory for relative file paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "=========================================="
 echo "Installing MesloLGS NF Fonts"
 echo "=========================================="
@@ -134,9 +137,9 @@ elif command -v gnome-terminal > /dev/null; then
     echo "🖥️  GNOME Terminal detected"
     echo ""
     
-    if [ -f "gterminal.preferences" ]; then
+    if [ -f "$SCRIPT_DIR/gterminal.preferences" ]; then
         echo "Applying GNOME Terminal profile settings..."
-        if dconf load /org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/ < gterminal.preferences 2>/dev/null; then
+        if dconf load /org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/ < "$SCRIPT_DIR/gterminal.preferences" 2>/dev/null; then
             echo "✓ Terminal profile configured successfully"
             echo ""
             echo "Close and re-open this terminal to see the changes."
