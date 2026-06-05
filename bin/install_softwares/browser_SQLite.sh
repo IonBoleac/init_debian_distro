@@ -2,7 +2,7 @@
 
 
 # Function to install browser SQLite
-install_browser-SQLite() {
+install_browser_SQLite() {
     log_message "INFO" "Installing SQLite Browser in progress..."
     is_installed "sqlitebrowser" && return
 

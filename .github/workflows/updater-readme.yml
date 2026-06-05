@@ -11,6 +11,8 @@ on:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -35,7 +37,7 @@ jobs:
           fi
 
       - name: Commit and push changes if README.md was modified
-        if: steps.check_readme.outputs.modified == 'true'
+        if: steps.check_readme.outputs.modified == 'true' && github.event_name == 'push'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

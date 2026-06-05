@@ -26,36 +26,38 @@ get_latest_go_version() {
 install_GO() {
     local GO_DIRECTORY="$HOME/go"
     local GO_VERSION_FALLBACK="1.23.2"
-    
-    # Verify if GO already exists
-    if [ -d "$GO_DIRECTORY" ]; then
-        log_message "INFO" "GO directory already exists."
+    local GO_ARCH
+    GO_ARCH="$(dpkg --print-architecture)"   # amd64 / arm64
+
+    # In dry-run mostra i passi anche se la dir esiste; in modalità reale salta se già presente
+    if [ "$DRY_RUN" -ne 1 ] && [ -d "$GO_DIRECTORY" ]; then
+        log_message "INFO" "GO directory already exists. Skipping."
         return
     fi
-    
+
     # Get latest version (with fallback)
     local GO_VERSION
     GO_VERSION=$(get_latest_go_version "$GO_VERSION_FALLBACK")
-    
+
     # Log the version being installed
     if [ "$GO_VERSION" = "$GO_VERSION_FALLBACK" ]; then
         log_message "WARN" "Using fallback GO version: $GO_VERSION"
     else
         log_message "INFO" "Latest GO version from API: $GO_VERSION"
     fi
-    
-    local GO_TAR_FILE="go$GO_VERSION.linux-amd64.tar.gz"
+
+    local GO_TAR_FILE="go$GO_VERSION.linux-${GO_ARCH}.tar.gz"
     local GO_URL="https://go.dev/dl/$GO_TAR_FILE"
 
-    log_message "INFO" "Installing GO version $GO_VERSION from tar file"
+    log_message "INFO" "Installing GO version $GO_VERSION ($GO_ARCH) from tar file"
     log_message "INFO" "Installing it in local directory: $GO_DIRECTORY"
 
     if [ "$DRY_RUN" -eq 1 ]; then
         log_message "INFO" "[DRY-RUN] Would download GO from $GO_URL"
         log_message "INFO" "[DRY-RUN] Would extract GO archive"
         log_message "INFO" "[DRY-RUN] Would copy GO to $GO_DIRECTORY"
-        log_message "INFO" "[DRY-RUN] Would add GO to PATH in ~/.bashrc"
-        log_message "INFO" "GO successfully installed. Restart shell or run 'source ~/.bashrc' to use go"
+        log_message "INFO" "[DRY-RUN] Would add GO to PATH in shell rc"
+        log_message "INFO" "GO successfully installed. Restart your shell to use go"
         return
     fi
 
@@ -89,13 +91,17 @@ install_GO() {
     # Clean up downloaded and extracted files
     rm -rf go "$GO_TAR_FILE"
 
-    # Add GO to PATH in .bashrc
-    echo "export GOPATH=$GO_DIRECTORY" >> ~/.bashrc
-    echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bashrc
+    # Add GO to PATH nel profilo della shell corretta (idempotente)
+    local RC_FILE="$HOME/.bashrc"
+    [ "${USER_SHELL:-}" = "zsh" ] && RC_FILE="$HOME/.zshrc"
+    if ! grep -q "GOPATH=$GO_DIRECTORY" "$RC_FILE" 2>/dev/null; then
+        echo "export GOPATH=$GO_DIRECTORY" >> "$RC_FILE"
+        echo 'export PATH=$PATH:$GOPATH/bin' >> "$RC_FILE"
+    fi
 
     # Verify installation
     if [ -d "$GO_DIRECTORY" ]; then
-        log_message "INFO" "GO successfully installed. Restart shell or run 'source ~/.bashrc' to use go"
+        log_message "INFO" "GO successfully installed. Restart your shell to use go"
     else
         log_message "ERROR" "GO installation failed - directory not created"
         FAILED_INSTALLATIONS+=("GO")

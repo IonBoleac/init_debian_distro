@@ -1,0 +1,767 @@
+toolsets:
+  gcloud/compute:
+    description: "Read-only access to Google Cloud Compute Engine resources (instances, disks, operations)"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+        expected_output: "Google Cloud SDK"
+      # Verifica che GOOGLE_CLOUD_PROJECT sia settato O che gcloud abbia un progetto attivo
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    llm_instructions: |
+      When investigating GCP Compute Engine issues:
+      - Always check instance status first with gcloud_list_instances or gcloud_describe_instance
+      - Review recent operations with gcloud_list_operations for configuration changes
+      - Use gcloud_get_serial_port_output for boot failures or kernel panics
+      - Check quotas with gcloud_describe_project if resources fail to provision
+      - All commands operate on the project specified by GOOGLE_CLOUD_PROJECT env var or parameter
+      
+      Project Selection Priority:
+      1. Explicit project_id parameter in tool call
+      2. GOOGLE_CLOUD_PROJECT environment variable (set via docker run -e GOOGLE_CLOUD_PROJECT=...)
+      3. Active gcloud project (gcloud config get-value project)
+      
+      The project_id parameter is REQUIRED for all commands. If GOOGLE_CLOUD_PROJECT env var is set,
+      it will be used automatically. Otherwise, ask the user to specify project_id or set the env var.
+    
+    transformers:
+      - name: llm_summarize
+        config:
+          input_threshold: 1200
+          prompt: |
+            Summarize this GCP resource data focusing on:
+            - Resource status and health (RUNNING, TERMINATED, STOPPING, etc.)
+            - Errors, warnings, or unusual configurations
+            - Key metadata (zone, machine type, network, disk configuration)
+            - Group similar resources; highlight outliers and problematic instances
+            - Be concise: aim for ≤ 50% of original length
+            - Include grep-friendly identifiers (instance names, zones, error codes)
+            - Mention exact field names for drilling down with grep or jq
+    
+    tools:
+      - name: "gcloud_list_instances"
+        description: >
+          List compute instances with OPTIONAL filtering by zone, region, or custom filter.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID (can be set via GOOGLE_CLOUD_PROJECT env var)
+          
+          OPTIONAL parameters:
+          - zone: Filter by specific zone (e.g., us-central1-a)
+          - region: Filter by region (e.g., us-central1)
+          - filter: Custom gcloud filter expression (e.g., "status=RUNNING")
+          - limit: Max number of results (default: all)
+          
+          Call this when you need to:
+          - Get an overview of instances (all, or filtered by zone/region/status)
+          - Find instances by name or status
+          - Check how many instances are running
+        user_description: "list compute instances in project {{ project_id }}{% if zone %} in zone {{ zone }}{% elif region %} in region {{ region }}{% endif %}{% if filter %} with filter {{ filter }}{% endif %}"
+        command: >
+          gcloud compute instances list
+          --project="{{ project_id }}"
+          {% if zone %}--filter='zone:{{ zone }}'{% elif region %}--filter='zone:{{ region }}-*'{% endif %}
+          {% if filter and not zone and not region %}--filter='{{ filter }}'{% elif filter %}--filter='zone:{% if zone %}{{ zone }}{% else %}{{ region }}-*{% endif %} AND {{ filter }}'{% endif %}
+          {% if limit %}--limit={{ limit }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_describe_instance"
+        description: >
+          Get detailed information about a specific compute instance.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - instance_name: Name of the instance
+          
+          OPTIONAL parameters:
+          - zone: Zone where instance is located (if not provided, searches all zones)
+        user_description: "describe instance {{ instance_name }} in project {{ project_id }}{% if zone %} in zone {{ zone }}{% endif %}"
+        command: >
+          {% if zone %}
+          gcloud compute instances describe {{ instance_name }} --zone {{ zone }} --project="{{ project_id }}" --format=json
+          {% else %}
+          gcloud compute instances list --filter='name={{ instance_name }}' --project="{{ project_id }}" --format=json | jq '.[0]'
+          {% endif %}
+
+      - name: "gcloud_list_operations"
+        description: >
+          List recent Compute Engine operations with optional filtering.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - zone: Filter by specific zone
+          - region: Filter by region
+          - filter: Custom filter (e.g., "status=DONE" or "operationType=insert")
+          - limit: Number of results (default: 50)
+        user_description: "show recent compute operations in project {{ project_id }}{% if zone %} in zone {{ zone }}{% elif region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute operations list
+          --project="{{ project_id }}"
+          {% if zone %}--filter='zone:{{ zone }}'{% elif region %}--filter='zone:{{ region }}-*'{% endif %}
+          {% if filter and not zone and not region %}--filter='{{ filter }}'{% elif filter %}--filter='zone:{% if zone %}{{ zone }}{% else %}{{ region }}-*{% endif %} AND {{ filter }}'{% endif %}
+          --limit={{ limit | default(50) }}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 800
+
+      - name: "gcloud_get_serial_port_output"
+        description: >
+          Get serial console output from an instance for debugging boot issues.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - instance_name: Name of the instance
+          
+          OPTIONAL parameters:
+          - zone: Zone where instance is located
+        user_description: "get serial console output for instance {{ instance_name }} in project {{ project_id }}{% if zone %} in zone {{ zone }}{% endif %}"
+        command: >
+          {% if zone %}
+          gcloud compute instances get-serial-port-output {{ instance_name }} --zone {{ zone }} --project="{{ project_id }}"
+          {% else %}
+          ZONE=$(gcloud compute instances list --filter='name={{ instance_name }}' --project="{{ project_id }}" --format='value(zone)' | head -n1) && \
+          gcloud compute instances get-serial-port-output {{ instance_name }} --zone $ZONE --project="{{ project_id }}"
+          {% endif %}
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 2000
+
+      - name: "gcloud_describe_project"
+        description: >
+          Get GCP project information including quotas and usage limits.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID to describe
+        user_description: "describe GCP project {{ project_id }} and quotas"
+        command: "gcloud compute project-info describe --project=\"{{ project_id }}\" --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1500
+
+      - name: "gcloud_list_disks"
+        description: >
+          List persistent disks with optional filtering.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - zone: Filter by specific zone
+          - region: Filter by region
+          - filter: Custom filter expression
+        user_description: "list persistent disks in project {{ project_id }}{% if zone %} in zone {{ zone }}{% elif region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute disks list
+          --project="{{ project_id }}"
+          {% if zone %}--filter='zone:{{ zone }}'{% elif region %}--filter='zone:{{ region }}-*'{% endif %}
+          {% if filter %}--filter='{{ filter }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_describe_disk"
+        description: >
+          Get detailed information about a specific disk.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - disk_name: Name of the disk
+          
+          OPTIONAL parameters:
+          - zone: Zone where disk is located
+        user_description: "describe disk {{ disk_name }} in project {{ project_id }}{% if zone %} in zone {{ zone }}{% endif %}"
+        command: >
+          {% if zone %}
+          gcloud compute disks describe {{ disk_name }} --zone {{ zone }} --project="{{ project_id }}" --format=json
+          {% else %}
+          gcloud compute disks list --filter='name={{ disk_name }}' --project="{{ project_id }}" --format=json | jq '.[0]'
+          {% endif %}
+
+      - name: "gcloud_list_machine_types"
+        description: >
+          List available machine types in a zone or region.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - zone OR region: Location to check machine types
+        user_description: "list machine types in project {{ project_id }} {% if zone %}zone {{ zone }}{% else %}region {{ region }}{% endif %}"
+        command: >
+          gcloud compute machine-types list
+          --project="{{ project_id }}"
+          --filter='zone:{% if zone %}{{ zone }}{% else %}{{ region }}-*{% endif %}'
+          {% if limit %}--limit={{ limit }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1500
+
+      - name: "gcloud_list_instance_groups"
+        description: >
+          List instance groups (managed and unmanaged).
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - zone: Filter by zone
+          - region: Filter by region
+        user_description: "list instance groups in project {{ project_id }}{% if zone %} in zone {{ zone }}{% elif region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute instance-groups list
+          --project="{{ project_id }}"
+          {% if zone %}--filter='zone:{{ zone }}'{% elif region %}--filter='zone:{{ region }}-*'{% endif %}
+          --format=json
+
+      - name: "gcloud_list_snapshots"
+        description: >
+          List disk snapshots.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - filter: Custom filter expression
+          - limit: Number of results (default: 50)
+        user_description: "list disk snapshots in project {{ project_id }}{% if filter %} with filter {{ filter }}{% endif %}"
+        command: >
+          gcloud compute snapshots list
+          --project="{{ project_id }}"
+          {% if filter %}--filter='{{ filter }}'{% endif %}
+          {% if limit %}--limit={{ limit | default(50) }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+  gcloud/storage:
+    description: "Read-only access to Google Cloud Storage buckets and objects"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    llm_instructions: |
+      When investigating Google Cloud Storage issues:
+      - All commands require project_id (from GOOGLE_CLOUD_PROJECT or parameter)
+      - Use gcloud_list_buckets to get overview (optionally filter by location)
+      - Use gcloud_describe_bucket for detailed bucket configuration
+      - Verify IAM policies with gcloud_get_bucket_iam (read-only)
+    
+    tools:
+      - name: "gcloud_list_buckets"
+        description: >
+          List Cloud Storage buckets.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - location: Filter by location
+        user_description: "list Cloud Storage buckets in project {{ project_id }}{% if location %} in location {{ location }}{% endif %}"
+        command: >
+          gcloud storage buckets list
+          --project="{{ project_id }}"
+          {% if location %}--filter='location:{{ location }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 800
+
+      - name: "gcloud_describe_bucket"
+        description: >
+          Get detailed information about a Cloud Storage bucket.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - bucket_name: Name of the bucket (without gs:// prefix)
+        user_description: "describe bucket {{ bucket_name }} in project {{ project_id }}"
+        command: "gcloud storage buckets describe gs://{{ bucket_name }} --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_get_bucket_iam"
+        description: >
+          Get IAM policy for a bucket (read-only).
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - bucket_name: Name of the bucket
+        user_description: "get IAM policy for bucket {{ bucket_name }} in project {{ project_id }}"
+        command: "gcloud storage buckets get-iam-policy gs://{{ bucket_name }} --project=\"{{ project_id }}\" --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_list_bucket_objects"
+        description: >
+          List objects in a bucket.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID (used for authentication)
+          - bucket_name: Name of the bucket
+          
+          OPTIONAL parameters:
+          - prefix: Path prefix to filter objects
+          - recursive: If true, list recursively
+        user_description: "list objects in bucket {{ bucket_name }} (project {{ project_id }}){% if prefix %} with prefix {{ prefix }}{% endif %}"
+        command: >
+          gcloud storage ls
+          {% if recursive %}--recursive {% endif %}
+          gs://{{ bucket_name }}/{% if prefix %}{{ prefix }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1200
+
+  gcloud/networking:
+    description: "Read-only access to Google Cloud networking resources"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    llm_instructions: |
+      When investigating GCP networking issues:
+      - All commands require project_id parameter
+      - All location filters (network, region, zone) are OPTIONAL
+    
+    tools:
+      - name: "gcloud_list_networks"
+        description: >
+          List all VPC networks.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "list all VPC networks in project {{ project_id }}"
+        command: "gcloud compute networks list --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_describe_network"
+        description: >
+          Get detailed information about a VPC network.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - network_name: Name of the network
+        user_description: "describe network {{ network_name }} in project {{ project_id }}"
+        command: "gcloud compute networks describe {{ network_name }} --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_list_subnets"
+        description: >
+          List subnets.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - network: Filter by network name
+          - region: Filter by region
+        user_description: "list subnets in project {{ project_id }}{% if network %} in network {{ network }}{% endif %}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute networks subnets list
+          --project="{{ project_id }}"
+          {% if network %}--network={{ network }}{% endif %}
+          {% if region %}--filter='region:{{ region }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_describe_subnet"
+        description: >
+          Get detailed subnet information.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - subnet_name: Name of the subnet
+          - region: Region where subnet is located
+        user_description: "describe subnet {{ subnet_name }} in region {{ region }} (project {{ project_id }})"
+        command: "gcloud compute networks subnets describe {{ subnet_name }} --region={{ region }} --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_list_firewall_rules"
+        description: >
+          List firewall rules.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - network: Filter by network
+        user_description: "list firewall rules in project {{ project_id }}{% if network %} for network {{ network }}{% endif %}"
+        command: >
+          gcloud compute firewall-rules list
+          --project="{{ project_id }}"
+          {% if network %}--filter='network:{{ network }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1200
+
+      - name: "gcloud_describe_firewall_rule"
+        description: >
+          Get detailed firewall rule information.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - rule_name: Name of the firewall rule
+        user_description: "describe firewall rule {{ rule_name }} in project {{ project_id }}"
+        command: "gcloud compute firewall-rules describe {{ rule_name }} --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_list_forwarding_rules"
+        description: >
+          List forwarding rules (load balancers).
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - region: Filter by region (omit for global and all regional)
+        user_description: "list forwarding rules in project {{ project_id }}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute forwarding-rules list
+          --project="{{ project_id }}"
+          {% if region %}--filter='region:{{ region }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_describe_forwarding_rule"
+        description: >
+          Get detailed forwarding rule information.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - rule_name: Name of the forwarding rule
+          
+          OPTIONAL parameters:
+          - region: Region for regional rules (omit for global)
+        user_description: "describe forwarding rule {{ rule_name }} in project {{ project_id }}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute forwarding-rules describe {{ rule_name }}
+          --project="{{ project_id }}"
+          {% if region %}--region={{ region }}{% else %}--global{% endif %}
+          --format=json
+
+      - name: "gcloud_list_routers"
+        description: >
+          List Cloud Routers.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - region: Filter by region
+        user_description: "list Cloud Routers in project {{ project_id }}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute routers list
+          --project="{{ project_id }}"
+          {% if region %}--filter='region:{{ region }}'{% endif %}
+          --format=json
+
+      - name: "gcloud_list_vpn_tunnels"
+        description: >
+          List VPN tunnels.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - region: Filter by region
+        user_description: "list VPN tunnels in project {{ project_id }}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute vpn-tunnels list
+          --project="{{ project_id }}"
+          {% if region %}--filter='region:{{ region }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 800
+
+      - name: "gcloud_list_routes"
+        description: >
+          List routes in VPC networks.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - network: Filter by network
+        user_description: "list routes in project {{ project_id }}{% if network %} for network {{ network }}{% endif %}"
+        command: >
+          gcloud compute routes list
+          --project="{{ project_id }}"
+          {% if network %}--filter='network:{{ network }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+  gcloud/gke:
+    description: "Read-only access to Google Kubernetes Engine (GKE) clusters"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    llm_instructions: |
+      When investigating GKE issues:
+      - All commands require project_id parameter
+      - List clusters first to get an overview
+      - Describe specific clusters for detailed configuration
+      - Check node pools for capacity and autoscaling issues
+    
+    tools:
+      - name: "gcloud_list_gke_clusters"
+        description: >
+          List GKE clusters.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - zone: Filter by zone
+          - region: Filter by region (for regional clusters)
+        user_description: "list GKE clusters in project {{ project_id }}{% if zone %} in zone {{ zone }}{% elif region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud container clusters list
+          --project="{{ project_id }}"
+          {% if zone %}--zone={{ zone }}{% elif region %}--region={{ region }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_describe_gke_cluster"
+        description: >
+          Get detailed information about a GKE cluster.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - cluster_name: Name of the cluster
+          - zone OR region: Location of the cluster
+        user_description: "describe GKE cluster {{ cluster_name }} in project {{ project_id }} {% if zone %}zone {{ zone }}{% else %}region {{ region }}{% endif %}"
+        command: >
+          gcloud container clusters describe {{ cluster_name }}
+          --project="{{ project_id }}"
+          {% if zone %}--zone={{ zone }}{% else %}--region={{ region }}{% endif %}
+          --format=json
+
+      - name: "gcloud_list_gke_node_pools"
+        description: >
+          List node pools for a GKE cluster.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - cluster_name: Name of the cluster
+          - zone OR region: Location of the cluster
+        user_description: "list node pools for cluster {{ cluster_name }} in project {{ project_id }}"
+        command: >
+          gcloud container node-pools list
+          --cluster={{ cluster_name }}
+          --project="{{ project_id }}"
+          {% if zone %}--zone={{ zone }}{% else %}--region={{ region }}{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 800
+
+      - name: "gcloud_describe_gke_node_pool"
+        description: >
+          Get detailed information about a node pool.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - cluster_name: Name of the cluster
+          - node_pool_name: Name of the node pool
+          - zone OR region: Location of the cluster
+        user_description: "describe node pool {{ node_pool_name }} in cluster {{ cluster_name }} (project {{ project_id }})"
+        command: >
+          gcloud container node-pools describe {{ node_pool_name }}
+          --cluster={{ cluster_name }}
+          --project="{{ project_id }}"
+          {% if zone %}--zone={{ zone }}{% else %}--region={{ region }}{% endif %}
+          --format=json
+
+  gcloud/iam:
+    description: "Read-only access to GCP IAM service accounts and policies"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    llm_instructions: |
+      When investigating IAM and permissions issues:
+      - All commands require project_id parameter
+      - List service accounts to see automation identities
+      - Check project IAM policy to understand access
+      - All commands are read-only for security
+    
+    tools:
+      - name: "gcloud_list_service_accounts"
+        description: >
+          List service accounts.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - filter: Custom filter expression
+        user_description: "list service accounts in project {{ project_id }}{% if filter %} with filter {{ filter }}{% endif %}"
+        command: >
+          gcloud iam service-accounts list
+          --project="{{ project_id }}"
+          {% if filter %}--filter='{{ filter }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 800
+
+      - name: "gcloud_describe_service_account"
+        description: >
+          Get detailed service account information.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          - service_account_email: Email of the service account
+        user_description: "describe service account {{ service_account_email }} in project {{ project_id }}"
+        command: "gcloud iam service-accounts describe {{ service_account_email }} --project=\"{{ project_id }}\" --format=json"
+
+      - name: "gcloud_get_project_iam_policy"
+        description: >
+          Get IAM policy bindings for the project (read-only).
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "get IAM policy for project {{ project_id }}"
+        command: "gcloud projects get-iam-policy {{ project_id }} --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1500
+
+      - name: "gcloud_list_custom_roles"
+        description: >
+          List custom IAM roles.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "list custom IAM roles in project {{ project_id }}"
+        command: "gcloud iam roles list --project=\"{{ project_id }}\" --format=json"
+
+  gcloud/project:
+    description: "Read-only access to GCP project-level information"
+    docs_url: "https://holmesgpt.dev/data-sources/builtin-toolsets/gcloud/"
+    icon_url: "https://www.gstatic.com/images/branding/product/2x/google_cloud_64dp.png"
+    tags:
+      - cli
+    prerequisites:
+      - command: "gcloud version"
+      - command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+    
+    tools:
+      - name: "gcloud_get_active_project"
+        description: "Get the currently active GCP project ID from gcloud config or GOOGLE_CLOUD_PROJECT env var."
+        user_description: "get active GCP project"
+        command: "bash -c 'if [ -n \"$GOOGLE_CLOUD_PROJECT\" ]; then echo $GOOGLE_CLOUD_PROJECT; else gcloud config get-value project; fi'"
+
+      - name: "gcloud_get_active_account"
+        description: "Get the currently active gcloud account (email)."
+        user_description: "get active gcloud account"
+        command: "gcloud config get-value account"
+
+      - name: "gcloud_list_regions"
+        description: >
+          List all available GCP regions.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "list all GCP regions (project {{ project_id }})"
+        command: "gcloud compute regions list --project=\"{{ project_id }}\" --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_list_zones"
+        description: >
+          List GCP zones.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+          
+          OPTIONAL parameters:
+          - region: Filter by region
+        user_description: "list GCP zones in project {{ project_id }}{% if region %} in region {{ region }}{% endif %}"
+        command: >
+          gcloud compute zones list
+          --project="{{ project_id }}"
+          {% if region %}--filter='region:{{ region }}'{% endif %}
+          --format=json
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1200
+
+      - name: "gcloud_get_project_metadata"
+        description: >
+          Get project-wide metadata.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "get metadata for project {{ project_id }}"
+        command: "gcloud compute project-info describe --project=\"{{ project_id }}\" --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000
+
+      - name: "gcloud_list_apis"
+        description: >
+          List enabled APIs and services.
+          
+          REQUIRED parameters:
+          - project_id: GCP project ID
+        user_description: "list enabled APIs in project {{ project_id }}"
+        command: "gcloud services list --enabled --project=\"{{ project_id }}\" --format=json"
+        transformers:
+          - name: llm_summarize
+            config:
+              input_threshold: 1000

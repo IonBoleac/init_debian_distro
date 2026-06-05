@@ -16,8 +16,13 @@ install_kubectl() {
     #     esac
     # fi
 
+    local KARCH
+    KARCH="$(dpkg --print-architecture)"   # amd64 / arm64
+    local KUBECTL_VERSION
+    KUBECTL_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
+
     # Download kubectl
-    verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl""
+    verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl"
 
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download kubectl. Check your internet connection or try manually: curl -LO https://dl.k8s.io/release/stable.txt"
@@ -25,9 +30,8 @@ install_kubectl() {
         return
     fi
 
-
     # Verify the kubectl binary
-    verify_command "curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256""
+    verify_command "curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KARCH}/kubectl.sha256"
 
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download kubectl.sha256. Check your internet connection and try again."
@@ -78,17 +82,22 @@ install_kubectl() {
     rm -f kubectl kubectl.sha256
 
     # Install krew (kubectl plugin manager)
+    # Salta in modalità non interattiva (CI, pipe) per evitare blocchi su read EOF
+    if [ ! -t 0 ] || [ "${CI:-}" = "true" ]; then
+        log_message "INFO" "Non-interactive shell detected: skipping krew installation."
+        return
+    fi
     echo "Would you like to install krew at the latest version? [y|n]"
     while :
     do
-        if [ "$AUTOMATIC_START" == "true" ]; then
+        if [ "${AUTOMATIC_START:-}" == "true" ]; then
             res="y"
             echo "Automatic installation started."
         else
-            read -n 1 res
+            read -n 1 res || { echo ""; echo "No input (EOF): skipping krew."; break; }
             echo ""  # Add newline after reading single character
         fi
-        
+
         case $res in
             y|Y)
                 (

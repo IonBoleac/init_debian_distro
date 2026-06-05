@@ -25,17 +25,15 @@ jobs:
           which wget || echo "wget not found"
           which curl || echo "curl not found"
           
-      # Skip snap-based installations in CI (Microk8s, AzureStorageExplorer)
-      # Skip installations that require heavy downloads or complex setup (GO, nvm, k9s)
-      
+      # Skip snap-based installations (Microk8s, AzureStorageExplorer) and GUI apps (Brave, Spotify, VSCode)
+      # Skip interactive/heavy installs; < /dev/null prevents read blocks (e.g. krew prompt)
+
       - name: Run installation script with selected software
         run: |
           cd bin
-          # Export PATH to ensure commands are available
-          ./install_softwares.sh -ax Spotify 
+          ./install_softwares.sh -ax Spotify Brave AzureStorageExplorer Microk8s VSCode < /dev/null
         env:
           CI: true
-          # PATH: /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
 
       - name: Verify installations
         run: |

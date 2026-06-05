@@ -6,20 +6,24 @@ install_k9s() {
     # Verify if k9s is already installed
     is_installed "k9s" && return
 
+    local KARCH
+    KARCH="$(dpkg --print-architecture)"   # amd64 / arm64
+    local K9S_DEB="k9s_linux_${KARCH}.deb"
+
     if [ "$DRY_RUN" -eq 1 ]; then
-        log_message "INFO" "[DRY-RUN] Would download k9s_linux_amd64.deb from GitHub"
+        log_message "INFO" "[DRY-RUN] Would download ${K9S_DEB} from GitHub"
         log_message "INFO" "[DRY-RUN] Would install k9s package"
         log_message "INFO" "[DRY-RUN] Would verify k9s installation"
         log_message "INFO" "k9s successfully installed and configured"
         return
     fi
 
-    verify_command "wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb && sudo apt install -y ./k9s_linux_amd64.deb && rm k9s_linux_amd64.deb"
-    
+    verify_command "wget https://github.com/derailed/k9s/releases/latest/download/${K9S_DEB} && sudo apt install -y ./${K9S_DEB} && rm ${K9S_DEB}"
+
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to install k9s. Check logs for details or download manually from https://github.com/derailed/k9s"
         FAILED_INSTALLATIONS+=("k9s")
-        rm -f k9s_linux_amd64.deb
+        rm -f "${K9S_DEB}"
         return
     fi
 
@@ -33,13 +37,17 @@ install_k9s() {
         return
     fi
 
-    # copy the k9s plugins
-    cp -r $PARENT_DIRECTORY/bin/config/k9s/plugins $HOME/.k9s/ 2>/dev/null
-
-    # verify plugins copy
-    if [ -d "$HOME/.k9s/plugins" ]; then
-        log_message "INFO" "k9s plugins successfully copied to $HOME/.k9s/plugins"
+    # Copia i plugin k9s nella config dir corretta (idempotente)
+    local K9S_CFG="$HOME/.config/k9s"
+    local PLUGINS_SRC="${PARENT_DIRECTORY:-$(cd "$(dirname "$0")/../.." && pwd)}/bin/config/k9s/plugins"
+    if [ -d "$PLUGINS_SRC" ]; then
+        mkdir -p "$K9S_CFG"
+        if cp -r "$PLUGINS_SRC" "$K9S_CFG/"; then
+            log_message "INFO" "k9s plugins successfully copied to $K9S_CFG/plugins"
+        else
+            log_message "ERROR" "Failed to copy k9s plugins to $K9S_CFG/plugins"
+        fi
     else
-        log_message "WARNING" "Failed to copy k9s plugins to $HOME/.k9s/plugins"
+        log_message "INFO" "k9s plugins source not found, skipping copy"
     fi
 }

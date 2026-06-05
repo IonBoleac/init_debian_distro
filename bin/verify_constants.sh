@@ -31,8 +31,15 @@ validate_entry() {
     fi
 
     # Validate install_method
-    if ! [[ $install_method =~ ^(apt|snap|curl|script|tar|test)$ ]]; then
+    if ! [[ $install_method =~ ^(apt|snap|curl|wget|script|tar)$ ]]; then
         echo "Error: Invalid install_method '$install_method' for '$key'."
+        flag=1
+        return 1
+    fi
+
+    # Validate install_function name (deve essere un identificatore bash valido)
+    if ! [[ $install_function =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+        echo "Error: Invalid install_function name '$install_function' for '$key' (not a valid bash identifier)."
         flag=1
         return 1
     fi

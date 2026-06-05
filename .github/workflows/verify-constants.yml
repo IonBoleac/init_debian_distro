@@ -16,6 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run installation script with all software
+      - name: Verify constants
         run: |
-          ./bin/verify_constants.sh
+          cd bin
+          ./verify_constants.sh

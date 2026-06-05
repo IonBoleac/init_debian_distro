@@ -11,8 +11,8 @@ declare -A SOFTWARE_DETAILS=(
     ["kubectl"]="install_kubectl;curl;command-line tool for controlling Kubernetes clusters.;https://kubernetes.io/docs/reference/kubectl/"
     ["Node.js"]="install_NodeJS;curl;JavaScript runtime built on Chrome's V8 JavaScript engine.;https://nodejs.org/en/"
     ["Spotify"]="install_Spotify;apt;Digital music streaming service.;https://open.spotify.com/intl-it"
-    ["SQLite CLI"]="intall_SQLite_CLI;apt;command-line interface for SQLite.;https://sqlite.org/cli.html"
-    ["SQLite Browser"]="install_browser-SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;https://sqlitebrowser.org/dl/"
+    ["SQLite CLI"]="install_SQLite_CLI;apt;command-line interface for SQLite.;https://sqlite.org/cli.html"
+    ["SQLite Browser"]="install_browser_SQLite;apt;Visual tool to create, design, and edit database files compatible with SQLite.;https://sqlitebrowser.org/dl/"
     ["AzureStorageExplorer"]="install_AzureStorageExplorer;snap;Standalone app that makes it easy to work with Azure Storage data on Windows, macOS, and Linux.;https://azure.microsoft.com/en-us/products/storage/storage-explorer" 
     ["Microk8s"]="install_Microk8s;snap;Lightweight Kubernetes for workstations and appliances.;https://microk8s.io/"
     ["GO"]="install_GO;tar;Open-source programming language that makes it easy to build simple, reliable, and efficient software. GO version: go1.23.2 linux/amd64 from tar file;https://golang.org/"
@@ -20,7 +20,8 @@ declare -A SOFTWARE_DETAILS=(
     ["Helm"]="install_helm;curl;Package manager for Kubernetes.;https://helm.sh/"
     ["nvm"]="install_nvm;curl;Node Version Manager - manages multiple Node.js versions.;https://github.com/nvm-sh/nvm#installing-and-updating"
     ["k9s"]="install_k9s;wget;Kubernetes CLI to manage and observe your clusters in style.;https://github.com/derailed/k9s"
-
+    ["argocd"]="install_argocd;wget;Argo CD CLI tool.;https://argo-cd.readthedocs.io/en/stable/cli_installation/"
+    ["argocd-autopilot"]="install_argocd_autopilot;curl;Argo CD Autopilot CLI tool.;https://argoproj-labs.github.io/argocd-autopilot/"
     #["test"]="test;test;test;test"
 )
 export SOFTWARE_DETAILS
@@ -78,7 +79,6 @@ export LINK_SOFTWARE_LIST
 
 # Constants
 LOG_FILE="logs.log"
-export LOG_FILE
 export LOG_FILE
 
 COLUMN_WIDTH=40 # column width variable needed to show correctly the helper function
