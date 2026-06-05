@@ -20,33 +20,38 @@ install_Docker() {
         return
     fi
 
+    # Determina la distro (debian o ubuntu) dal file os-release
+    local DOCKER_DISTRO="ubuntu"
+    if [ -f /etc/os-release ]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        if [ "$ID" = "debian" ]; then
+            DOCKER_DISTRO="debian"
+        fi
+    fi
+
     # Add Docker's official GPG key:
     sudo apt-get update > /dev/null 2>> "$LOG_FILE"
-    
-    apt_get_install ca-certificates curl 
-    
+    apt_get_install ca-certificates curl
     sudo install -m 0755 -d /etc/apt/keyrings
-    
-    verify_command "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc"
-    # verify if the download was successful
+
+    verify_command "sudo curl -fsSL https://download.docker.com/linux/${DOCKER_DISTRO}/gpg -o /etc/apt/keyrings/docker.asc"
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to download Docker GPG key. Check internet connection and permissions for /etc/apt/keyrings/"
         FAILED_INSTALLATIONS+=("Docker")
         return
     fi
-
     sudo chmod a+r /etc/apt/keyrings/docker.asc
 
     # Add the repository to Apt sources:
     echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${DOCKER_DISTRO} \
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
+    sudo apt-get update > /dev/null 2>> "$LOG_FILE"
 
-    # Install Docker
-    verify_command "apt_get_install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
-
+    # Install Docker (apt_get_install ora installa tutti i pacchetti)
+    apt_get_install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     if [ $? -ne 0 ]; then
         log_message "ERROR" "Failed to install Docker. Run 'sudo apt-get update' and check repository configuration. See logs for details."
         FAILED_INSTALLATIONS+=("Docker")
